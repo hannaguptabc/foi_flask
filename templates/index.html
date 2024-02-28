@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: "Poppins", sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header img {
+            height: 70px;
+        }
+
+        .wrapper {
+            padding: calc(100px + 40px) 20px 20px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            padding: 40px;
+            margin-top: 20px;
+        }
+
+        .input-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            color: #0066cc;
+        }
+
+        .input-container input[type="text"],
+        .input-container textarea,
+        .input-container input[type="datetime-local"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0077cc;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-container textarea {
+            resize: vertical;
+            height: 150px;
+        }
+
+        .input-container input[type="text"]:focus,
+        .input-container textarea:focus,
+        .input-container input[type="datetime-local"]:focus {
+            border-color: #0056b3;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+        }
+
+        .button-container input[type="submit"] {
+            background-color: #0066cc;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+            display: block;
+            width: 100%;
+            font-size: 18px;
+        }
+
+        .button-container input[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 20px;
+        }
+
+        .btn-wrapper button, .logout-btn {
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            background-color: #0077cc;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 700;
+        }
+
+        .btn-wrapper button:hover, .logout-btn:hover {
+            background-color: #0066cc;
+            transform: translateY(-3px);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 20px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+        /* Add this to your existing CSS or in a separate stylesheet */
+        /* Add this to your existing CSS or in a separate stylesheet */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Added */
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 20px; /* Added */
+            font-size: 16px; /* Added */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+
+    </style>
+    <title>FOI</title>
+</head>
+<body>
+<header class="header">
+    <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
+    <div><img src="static/image.png" alt="NHS Logo"/></div>
+    <button class="logout-btn">Logout</button>
+</header>
+<div class="wrapper">
+    <div class="container">
+        <form method="post" action="/index">
+            <div class="input-container">
+                <label for="input_text">Please enter the request:</label>
+                <textarea name="input_text" id="input_text" placeholder="Enter text here"></textarea>
+            </div>
+            <div class="input-container">
+                <label for="email_id">Please enter the email id associated with the request:</label>
+                <input type="text" name="email_id" id="email_id" placeholder="Enter email id here"/>
+            </div>
+            <div class="input-container">
+                <label for="timestamp">Please enter the timestamp:</label>
+                <input type="datetime-local" name="timestamp" id="timestamp"/>
+            </div>
+            <div class="button-container">
+                <input type="submit" value="Submit"/>
+            </div>
+        </form>
+    </div>
+    <div class="btn-wrapper">
+        <button>Previous</button>
+        <button>Next</button>
+    </div>
+</div>
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Processing your request...</div>
+</div>
+<footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
+</body>
+<script>
+    document.querySelector('.logout-btn').addEventListener('click', function() {
+        window.location.href = "/logout"; // Redirect to the /logout route
+    });
+    const form = document.querySelector('form');
+
+    form.addEventListener('submit', function(event) {
+        // Prevent default form submission
+        event.preventDefault();
+        
+        // Show loading spinner on form submission
+        showLoading();
+        
+        // Submit the form after a delay (for demonstration purposes)
+        setTimeout(() => {
+            form.submit();
+        }, 2000); // Change the delay as needed
+    });
+
+    function showLoading() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.style.display = 'flex';
+    }
+</script>
+</html>

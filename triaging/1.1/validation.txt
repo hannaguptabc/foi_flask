@@ -1,0 +1,467 @@
+Recognising a request made under the Freedom of Information Act (section 8)
+Share(Opens Share panel)
+Share this pageShare via RedditShare via LinkedInShare via email
+Latest updates - last updated 6 April 2023
+About this detailed guidance
+This guidance discusses how to recognise and deal with a valid request for information made under the Freedom of Information Act. You should read it if you have questions not answered in the Guide, if you need a deeper understanding of how to recognise a valid request and it also offers guidance on the approach you should take when a request is not valid.
+
+In detail
+What does FOIA say?
+Do requests need to be in writing?
+What is meant by the “name of the applicant”?
+What is the definition of a ‘real name’?
+Are pseudonyms valid?
+How should we respond when the requester is commonly known by another name?
+Are requests submitted by organisations valid?
+Should we accept requests made on behalf of another person?
+What is meant by “valid address for correspondence”?
+Do we have to respond to requests made on whatdotheyknow.com or on social media?
+How should we respond to a request made on a social networking platform or online forum?
+What are the requester’s obligations to describe the information requested?
+Are requests which are framed by physical location valid?
+Are requests which are framed by electronic location valid?
+Are requests framed by the cost limit valid?
+Are requests framed as questions valid?
+Is a request submitted as a questionnaire valid?
+Are requests made using keywords valid?
+What should we do when a request is not clear enough for us to identify the information?
+What approach should we take when a request is unreasonably broad?
+Are conditional requests valid?
+How should we treat requests which depend on a change in circumstances?
+How should we treat requests which depend on circumstances remaining the same?
+Should we accept round robin requests?
+How should we treat requests for information in our publication scheme?
+What are our obligations to provide advice and assistance where the request is invalid?
+Further reading
+What does FOIA say?
+To be valid under FOIA, a request must fulfil the criteria set out in section 8 of the Act:
+
+8.—
+
+(1) In this Act any reference to a “request for information” is a reference to such a request which—
+
+(a) is in writing,
+
+(b) states the name of the applicant and an address for correspondence, and
+
+(c) describes the information requested.
+
+(2) For the purposes of subsection (1)(a), a request is to be treated as made in writing where the text of the request—
+
+(a) is transmitted by electronic means,
+
+(b) is received in legible form, and
+
+(c) is capable of being used for subsequent reference.
+
+This is not a hard test to satisfy; the vast majority of written requests for information will be valid. FOIA contains other provisions to deal with requests which are too broad, unclear or unreasonable.
+
+There are some circumstances where, despite the validity of a request, it may be more appropriate for you to deal with it outside of FOIA:
+
+If the requested information can be sent quickly and easily to the requester then it may be better dealt with in ‘the normal course of business’; for example, a request for a current leaflet.
+If the request is for the requester’s own personal data, then it should be dealt with as a subject access request under the Data Protection Act (see our Guide to Data Protection).
+If the request is for environmental information, then it should be dealt with under the Environmental Information Regulations (see our Guide to the Environmental Information Regulations).
+The requester can be an individual, a company or a pre-existing and identifiable organisation or group. In each case, they must provide their real name, either of the individual or organisation.
+
+A request made under a pseudonym is invalid.
+
+There is a low threshold for meeting the requirement to describe the information. A description is valid if it contains sufficient detail for the requested information to be distinguished from other information which you hold.
+
+If the description of the information is unclear or ambiguous, you must ask the requester for clarification in accordance with section 1(3) of FOIA.
+
+A request that depends on circumstances remaining the same (for example, ‘Unless x happens, please give me information on y …’) should be treated as valid.
+
+However, a request that depends on a change in circumstances (for example, ‘In the event of x, please send me information on y…’) is invalid.
+
+FOIA requests made using online forums and social media are valid, provided they meet the criteria in section 8(1). If you cannot provide a response through the platform concerned, you should ask the requester for an alternative address for correspondence.
+
+If the request does not meet the requirements of section 8(1), then you should issue the requester with a timely response explaining why their request is not valid. You should provide advice and assistance to help them submit a new request.
+
+An individual submitting an invalid request under section 8 does not have any further rights of complaint to the Information Commissioner.
+
+Do requests need to be in writing?
+Section 8 of FOIA requires requests to be made in writing. ‘In writing’ covers requests submitted by letter and electronic form, including those sent through WhatDoTheyKnow.com and social networking platforms such as Twitter and Facebook.
+
+For information on what to do if a prospective requester cannot put their request in writing, see ‘What if a prospective requestor cannot write to us?’ in our ‘Request handling, Freedom of Information – Frequently Asked Questions’.
+
+The request does not have to make any direct reference to FOIA, or be the sole or main theme of the requester’s correspondence. In fact, a request buried within the text of a long piece of correspondence is as valid as a standalone request, so long as it also fulfils the other criteria outlined in section 8.
+
+The tone and language of the request are not relevant in determining whether a request is valid under section 8. However, where you object to these, you may take this into account as evidence that the request is vexatious. Advice on how to identify and respond to vexatious requests can be found in our guidance Dealing with vexatious requests.
+
+If the request is illegible then it is invalid. You should offer the requester help in submitting a legible version. This is in accordance with your duty to provide reasonable advice and assistance to those seeking to make a request, under section 16 of the Act.
+
+What is meant by the “name of the applicant”?
+A requester can be an individual, a company or an identifiable pre-existing organisation or group, but in each case section 8(1)(b) requires that a request for information must include the real name of the requester. If they do not, their request will be invalid and they will not have any further rights of complaint to the Information Commissioner.
+
+In most cases you should be able to consider requests without reference to the requesters identify. However, under section 8(1)(b) if you have reason to believe the requester hasn’t given their real name you can enquire about the requesters identity.
+
+For example, if the requester fails to provide a name, cannot be identified from the name provided or is using an obvious pseudonym, then their request won’t meet the requirements of section 8(1)(b) and will be technically invalid.
+
+The intention of the legislation is for the requester to provide their real name so their request can be processed in accordance with FOIA. There are circumstances under FOIA where a requester’s true identity can be relevant; such as where you may be considering;
+
+aggregating the cost of requests (s12),
+refusing a request as vexatious or repeated (s14),
+whether information is reasonably accessible to the requester by other means (s21), or
+whether the requester is requesting their own personal data (s40).
+If there is no obvious indication that the requester has not used their real name and you are not considering one of the above issues, then in the Commissioner’s view, it is unlikely that you will have to take steps to check the requester’s identity in order to process the request. You should not need to routinely check identities - in most cases it will be appropriate to accept the name that has been provided at face value and respond to the request in the normal way.
+
+Even if you suspect that the requester isn’t using their real name, you can still answer the request. However, if you decide to comply with an invalid request, the requester will be unable to make a complaint to the Commissioner if they are dissatisfied with the response. This is because the Commissioner’s powers only extend to valid requests for information as defined under section 8 of FOIA.
+
+We recommend that if you have strong reasons to doubt the identity of a requester, you should let them know, enquire about their identity and advise them to provide their real name.
+
+What is the definition of a ‘real name’?
+For a request to be valid, the requester must provide enough of their real name to give anyone reading that request a reasonable indication of their identity. This means that if you cannot identify the requester from the name provided, that request is invalid.
+
+You do not have to take into account the possibility that there may be staff elsewhere within your organisation who have dealt with the requester before, and might be capable of working out their identity from the contents of their request alone.
+
+Even if this were the case, you could still refuse the request, as the absence of a real name would make it technically invalid under section 8(1)(b).
+
+The Commissioner recognises that there are different ways of expressing a real name.
+
+Where an individual uses a title followed by a first name and a surname, any variation of the requester’s title or first name combined with their surname (e.g. Miss Wong or Natalie Wong) is sufficient to meet this requirement. However, one part of that name (e.g. Wong) provided in isolation, or a set of initials (e.g. N.W), may not be as it may not be sufficient to identify the requester.
+
+Example
+
+A requester whose name is Joseph Bloggs could call themselves ‘Joe Bloggs’, ‘Joey Bloggs’, ‘J Bloggs’ or ‘Mr Bloggs’.
+
+However, they could not just use ‘Joseph’, ‘Joe’, ‘Joey’ or ‘J.B’ as this may not be sufficient to identify the requester.
+
+A combination of the requester’s middle names and surname is also acceptable, as this is simply another way of expressing their real name.
+
+Example
+
+A requester called Sarah Anne Elizabeth Spencer could make a request in the name of ‘Anne Spencer’ or ‘Liz Spencer’.
+
+If the requester has a name they sometimes reverse or write in several different ways, then you should accept all of the possible variations.
+
+Example
+
+A requester called Mohammed Ali could use ‘Mr Ali’, ‘Mr Mohammed’, ‘Muhammed Ali’, or ‘Ali Muhammad’. However, ‘A.M’, ‘M.A’, ‘Ali’ or ‘Mohammad’ would not be acceptable as this may not be sufficient to identify the requester.
+
+The examples provided above are not exhaustive, and there are different ways of expressing a 'real name’. For example, whilst not common in the UK, some people are known by a single name only. Where a mononym is a ‘real name’ (and is capable of identifying the individual) a request made under that title with a correspondence address would satisfy the requirement at section 8(1)(b).
+
+Are pseudonyms valid?
+If the requester has used a pseudonym then their request is invalid.
+
+In some cases it is immediately obvious that a pseudonym is being used, for example where the request has been signed in the name of a famous fictional character, such as ‘Mickey Mouse’, an inanimate object, like ‘Mirrorball’, or by location, for instance as ‘disgruntled of Stockport’. Pun names such as Sue D Nym may also fall into this category.
+
+However, there may be situations where the name provided is not an obvious pseudonym and you have no reason to believe that a pseudonym is being used. It is the Commissioner’s view that in such situations you should accept the name provided at face value.
+
+Whilst this may mean that some pseudonymous requests will slip through the net, we do not envisage situations where you routinely carry out checks on requesters’ identities.
+
+How should we respond when the requester is commonly known by another name?
+If the requester is commonly known by another name, then you should accept this as valid for the purposes of section 8(1)(b). Examples include:
+
+a married woman who uses her maiden name for professional reasons but is known by her married name outside work; or
+an individual child who has assumed the surname of a step parent without formally changing their name, and has gone by that title for a number of years.
+The examples given above are not exhaustive. In some instances, it may difficult for the requester to provide you with evidence that they are commonly known by a particular name.
+
+You should aim to use a relatively informal means of confirming the requester’s identity rather than seeking formal evidence of identification.
+
+Are requests submitted by organisations valid?
+If the request is from a company, then you should accept either its full registered name or a name that exists as a legal entity (such as a trading name) as valid.
+
+Where the request is from a sole trader, you should accept either the proprietor’s name or the company name.
+
+Companies' names should generally be accepted at face value. In any case where you have reason to verify the authenticity of the company, you should check Companies House or the Charity Commission Register to clarify whether it is a genuine organisation.
+
+Requests from unincorporated bodies such as campaign groups or clubs are also valid, and in most cases should be accepted at face value. However, if you have reason to check whether the organisation is authentic, you may need to take a more pragmatic approach to validating its identity. These bodies are often relatively informal associations of people with no official status.
+
+We recommend that you adopt a lower and more informal test for determining whether a name provided by an unincorporated body is genuine.
+
+Example
+
+A campaign group titled “Wilmslow Against Parking Charges” makes a request for information. The group has a website. This is sufficient proof that the group is authentic and any requests it makes will be valid. It is not a prerequisite, however, for an organisation to have a website in order for their request to be valid. For instance, a pre-existing neighbourhood pressure group may not have an online presence, but is known in the locality through its campaigning.
+
+Should we accept requests made on behalf of another person?
+Requests are sometimes submitted by an ‘agent’ acting on behalf of another party. Examples of this include:
+
+a private individual making a request on behalf of a friend;
+an employee making a request on behalf of a company or employer;
+a journalist making a request on behalf of a newspaper; or
+a professional (such as a solicitor or accountant) making a request on behalf of a client.
+For the purposes of this type of request, you should interpret ‘the requester’ to mean the party on whose behalf the request has been made (in these examples, the friend, company, newspaper and client), not the person or organisation acting as their agent (the private individual, employee, journalist or professional in the above examples).
+
+This means that to be valid under section 8(1)(b), the request must state the real name of the party on whose behalf the agent is acting. A request which only includes the real name of the agent will be invalid.
+
+Example
+
+A journalist called Jane Davies wants to make a request for information about the cost of a new housing project on behalf of her newspaper, The Morning Herald.
+
+In this scenario, the following request would be valid under section 8(1)(b):
+
+‘On behalf of “The Morning Herald” I would like a detailed breakdown of the cost estimate for the new housing project. Signed, Jane Davies’
+
+This is because it includes the real name of the party on whose behalf a request is being made (The Morning Herald).
+
+However, if the journalist was to submit a request which made no reference to The Morning Herald, as in the example below, then it would be invalid;
+
+‘On behalf of my newspaper, I would like a detailed breakdown of the cost estimate for the new housing project. Signed, Jane Davies’
+
+This is because the request only states the identity of the agent; it does not name the party on whose behalf she is acting.
+
+It also follows that when someone who is acting as an agent for an organisation leaves its employment, the request doesn’t go with them but instead stays with that organisation.
+
+Example
+
+Returning to the previous example when the request was made as follows:
+
+‘On behalf of “The Morning Herald” I would like a detailed breakdown of the cost estimate for the new housing project. Signed, Jane Davies’
+
+If Jane Davies left the employment of the Morning Herald, then it would be The Morning Herald who would remain entitled to a response to this request under FOIA and not the former employee Jane Davies.
+
+What is meant by “valid address for correspondence”?
+Section 8(1)(b) also requires the requester to provide a valid address for correspondence.
+
+This can be any address where the requester may be contacted (including postal or email addresses) and does not have to be their normal residential or business address.
+
+A requester can use a “care of” or PO Box address, or even provide another individual’s email account as their contact address.
+
+If the request has been posted on a social media platform such as Twitter, then as long as that site offers a means for the authority to respond, such as a hyperlink to the requester’s email address or a ‘reply’ button, that request fulfils the requirement to provide a valid address.
+
+We recognise, however, that in some cases it may be technically difficult for you to provide an FOIA response via a social media platform, especially if a large volume of material is involved.
+
+Do we have to respond to requests made on whatdotheyknow.com or on social media?
+Requests made through whatdotheyknow.com will be valid, provided the requester supplies their real name and describes the information concerned.
+
+We consider the @whatdotheyknow.com email address provided when requests are made through the site to be a valid contact address for the purposes of section 8(1)(b).
+
+In any case where it is not reasonably practicable for you to provide the information in the electronic format required by whatdotheyknow.com, you should ask the requester to provide an alternative address where you may send your full response.
+
+If you have a presence on a social media platform, such as Twitter or Facebook, then any request you receive through that platform is valid, provided it fulfils the criteria set out in section 8.
+
+Example
+
+With specific regard to Twitter, requests that refer to your authority in the context of an ‘@mention’ context, for example, ‘@ICOnews’, should be treated as having been directed at and received by that authority for the purposes of FOIA.
+
+Where the requester’s username is an obvious pseudonym, or only includes a part of their real name (for example @john3453 or @smith6474) then the request will only be valid if their real name is visible elsewhere on their user profile.
+
+However, you can choose to respond to the request in any case where you are not satisfied as to the requester’s identity but are still content to respond.
+
+Where you refuse the request on the grounds that the name is invalid, we would expect you to fulfil your section 16 duty to provide advice and assistance to those wishing to make a request. You should advise the requester to resubmit the request using their real name.
+
+How should we respond to a request made on a social networking platform or online forum?
+If the requester has effectively made the request public by publishing it on a website, as opposed to sending a message to one of your email or private message accounts, then we consider it within the requester’s reasonable expectations that you will also publish your response on the site.
+
+If you believe that it is inappropriate to publish the information online, then you may wish to respond using a private message to the requester’s account instead. If this facility is not available then you should obtain an alternative contact address from the requester.
+Technical constraints may make it impractical for you to provide a response through the site in question.
+
+For example, where a request is submitted through Twitter, the limitations on the length of a tweet may prevent you from providing your full response in a reply.
+
+Where this is an issue you should ask the requester to provide a valid alternative address where you may send your response. If the complainant does not provide a valid alternative address, you are not obliged to respond to the request.
+
+You could also post the information on your own website and post a link to this from the site.
+
+What are the requester’s obligations to describe the information requested?
+Section 8(1)(c) states that a request can only be valid if it ‘describes the information requested’.
+
+Most requesters are unlikely to know what exact information you hold, or have an appreciation of how your records are stored. This means that they cannot always be expected to be specific about details such as the titles, contents and location of documents. They may also not always provide enough detail to enable you to identify the information from the description provided.
+
+For these reasons, we are of the view that there has to be a low test for a description to meet the requirements of section 8(1)(c). You should therefore treat any description that allows the requested information to be distinguished from other information you hold as valid under section 8(1)(c).
+
+There are many distinguishing characteristics that can help to set the information apart from any other material you hold. One of the most obvious is the subject matter of the information, as illustrated in the example below.
+
+Example
+
+A police authority launches an initiative to crack down on anti-social behaviour in town centres. Once the initiative has concluded, the authority receives the following request;
+
+‘Please provide me with all the information you hold concerning the effectiveness of your recent initiative to reduce anti-social behaviour’.
+
+Although this request does not reference any particular documents, the subject matter tells the authority that the information:
+
+is on the subject anti-social behaviour;
+relates specifically to the recent police crackdown; and
+concerns any assessment of the impact of that crackdown.
+These distinguishing characteristics will be sufficient to differentiate the requested information from the other information the authority holds on record.
+
+Other potentially distinguishing characteristics could be:
+
+the date of publication;
+the name of the author;
+the origins of the information;
+the recipients of documents; or
+types of documents,
+although this should by no means be considered an exhaustive list.
+
+Example
+
+On 12 July 2013 a Council published a report on its local care homes, entitled ‘Providing residential care in the 21st Century’. The report’s author was John Smith. The Council distributed copies of the report to every residential home in the borough.
+
+The following descriptions of this report would all be valid as each reveals something about the distinguishing characteristics of the information.
+
+‘I would like a copy of the report that you sent out to local care homes’
+
+The distinguishing characteristics described here are the type of document and its recipients.
+
+‘Please send me a copy of John’s Smith’s report’
+
+The characteristics described in this request are the type of document and author.
+
+‘Please provide me with a copy of the report you published on
+12 July 2013’
+
+The distinguishing characteristics in this request are the date of publication and type of document.
+
+This example illustrates that it is possible to describe the distinguishing characteristics of information without reference to its subject matter or content.
+
+Are requests which are framed by physical location valid?
+Requests that define the information solely by its physical location, such as ‘please provide me with a copy of all the information on your desk’ are not valid. This is because they reveal nothing about the recorded characteristics of the information. They simply define its physical whereabouts at a particular point in time.
+
+However, if the request links that location to a recorded characteristic of the information, then the description may still be valid.
+
+For example, a request phrased ‘I would like a copy of the contents of your private secretary’s notebook for September 8 2009’ describes the location (a notebook) but also ties this to recorded characteristics such as the date and author, so that it is still possible to differentiate that information from other held information.
+
+Are requests which are framed by electronic location valid?
+There is often a direct link between an electronic location (such as an email inbox) and the nature of the information recorded there. This means that it is sometimes possible to infer the recorded characteristics of electronically held information from its location alone.
+
+There will be instances where a request defined solely by an electronic location will reveal enough about the distinguishing characteristics of the information to be valid.
+
+Example
+
+A public authority receives a request for:
+
+‘all the information in your chief executive’s email account’.
+
+An email account contains copies of electronic correspondence sent and received by the account holder, which effectively makes this a request for all email correspondence sent and received by the chief executive.
+
+The request does, therefore, reveal distinguishing characteristics about the information, such as the identity of the sender of the correspondence and the type of communication, despite only being defined in terms of an electronic location.
+
+Requests based on an electronic location can often be very broad in scope. If you are concerned that a request is unreasonably broad, then you should consider refusing the request under section 12 of FOIA (cost limits) and offer the requester advice and assistance to help them refine their request. More details about the cost limits can be found in our guidance Requests where the cost of compliance with a request exceeds the appropriate limit.
+
+Are requests framed by the cost limit valid?
+These are characterised by requests such as:
+
+‘Beginning this year and going back each previous year until the cost limit is reached, I would like copies of all expenses claims submitted by the chief executive.’
+
+OR
+
+‘I would like as much information about the new retail development as you can provide within the cost limits.’
+
+Requests defined by the section 12 cost limits are invalid under section 8(1)(c). This is because their scope is determined by the extent of the record search you may carry out within those limits, rather than the distinguishing characteristics of the information itself.
+
+Although you are not obliged to process such requests, we consider that you still have a section 16 duty to provide the requester with reasonable advice and assistance to allow them to submit a properly-defined request.
+
+This advice might take the form of advising the requester what information could be provided within the cost limits, and asking if they would like to make a request for that information. You could also offer to help the requester to define their description, so it focuses more narrowly on the distinguishing characteristics of the information rather than the parameters of the search.
+
+Are requests framed as questions valid?
+A request in the form of a question is valid under section 8(1)(c), provided it still describes distinguishing characteristics of the information. In the examples below, the information is differentiated by its subject matter- sickness absence policy, overseas aid spending and measures to tackle vandalism respectively.
+
+‘Why has the Council changed its policy on sickness absence?’
+
+‘How much money did the department spend on overseas aid last year?’
+
+‘What is being done to tackle vandalism in the local park?’
+
+If the question fulfils the above criteria but is ambiguous or unclear, then it will still be a valid request under 8(1)(c). You will have to go back to the requester to ask them for clarification, in accordance with your duty to provide advice and assistance under section 16.
+
+Is a request submitted as a questionnaire valid?
+A questionnaire qualifies as an FOIA request provided the requester has supplied their real name and an address, and at least one of the questions provides a valid description of the information.
+
+However, you need to treat each individual question on its merits, which means adopting the following approach:
+
+Respond to any questions that provide a valid description of the information.
+For questions that are unclear, ask the requester for further clarification under section 1(3).
+If any of the questions fail to meet the criteria for a valid description, issue the requester with a timely response advising that they are invalid under section 8(1)(c) and explaining why.
+
+Are requests made using keywords valid?
+Sometimes a request may describe the information using one or more keywords, as in the example below:
+
+‘I would like copies of all the documents you hold containing the words ‘inquiry’ or ‘investigation’’
+
+These types of requests are valid under section 8(1)(c), because they make a distinction between information that does and does not contain those keywords.
+
+We recognise, however, that there is a possibility a requester may cite a keyword so common that it makes the scope of the request unreasonably broad. Where this is the case, you should consider refusing the request under section 12 of FOIA and contacting the requester to ask them to narrow down their request.
+
+What should we do when a request is not clear enough for us to identify the information?
+Section 1(3) states:
+
+1.—(3) Where a public authority—
+
+(a) reasonably requires further information in order to identify and locate the information requested, and
+
+(b) has informed the applicant of that requirement,
+
+the authority is not obliged to comply with subsection (1) unless it is supplied with that further information.
+
+Section 8(1)(c) is only concerned with the validity of the description; it cannot be used to refuse requests that are unclear.
+
+If a request is not sufficiently clear to enable you to locate or identify the information without further details, then your section 16 duty to provide advice and assistance is triggered. You must ask the requester to provide further clarification in accordance with section 1(3) of the Act.
+
+Example
+
+A requester asks a parish council for:
+
+‘A copy of the minutes of the parish meeting chaired by Councillor Jones.’
+
+The authority accepts that the request is valid under section 8(1)(c) because it describes distinguishing characteristics of the information, such as the type of document and the name of the chairman of the meeting.
+
+However, Councillor Jones has chaired several council meetings and the authority is unclear which meeting the requester is referring to.
+
+As the authority cannot locate and identify the minutes without further information, its duty to provide advice and assistance will be engaged, and it must contact the requester to ask them to clarify which meeting minutes they would like.
+
+Once you ask for further details under section 1(3), you will not be obliged to progress the request further until you receive the required clarification from the requester. At this point the time for compliance with the request will reset to 20 working days.
+
+What approach should we take when a request is unreasonably broad?
+If you can identify and locate the information but regard the request as unreasonably broad, then you should consider refusing it under section 12 (cost limits). You should then offer advice and assistance to help the requester narrow down the scope of their request.
+
+In some circumstances it may be appropriate to refuse an unreasonably broad request under section 14(1) (vexatious requests). However, we recommend that you consider if section 12 is appropriate in the first instance. Guidance on vexatious requests may be found at Dealing with vexatious requests (section 14).
+
+Are conditional requests valid?
+These are requests that can be read objectively as only becoming active when certain conditions are met. These fall into two categories; requests that depend on circumstances staying the same, and requests that depend on circumstances changing.
+
+How should we treat requests which depend on a change in circumstances?
+Examples of these requests include:
+
+‘If you do decide to close the local hospital, please provide me with the reasons for your decision.’
+
+‘Should you amend your admissions policy, I would like information about why you have changed it.’
+
+A request that is conditional on a change in circumstances will not be valid. This is because the requester does not want any information as things stand. They are only expressing an intention to ask for information in the future, which is not a ‘request for information’ under section 8.
+
+Nevertheless, these requests are likely to trigger your duty to provide assistance to a requester.
+
+You should therefore go back to the requester to advise them to resubmit the request once the change in circumstances they are anticipating has occurred.
+
+For instance, when applied to the example given above, this would mean advising the requester to wait for a decision to be made regarding the hospital before making their request.
+
+How should we treat requests which depend on circumstances remaining the same?
+Examples of these requests include:
+
+‘Unless the decision to impose parking restrictions in the town centre is reversed, I would like a copy of the minutes of the meeting at which this policy was approved’.
+
+‘Assuming my appeal fails, please provide me with a copy of the school’s anti-bullying policy’.
+
+A request that depends on the continuation of the circumstances is valid. It is a clear statement that the requester wants the information as things stand, rather than at some future time. You should therefore deal with these types of requests in the usual manner.
+
+Because the request is valid, the duty to respond under section 1(1) will continue to apply even if the circumstances do change or the requester’s assumptions prove to be incorrect.
+
+In that event, you would still be free to contact the requester to ask if they wanted to withdraw the request. Unless the requester does withdraw their request, however, you would be obliged to provide a response.
+
+Should we accept round robin requests?
+Round robin requests are requests that have been circulated to a number of public authorities. Provided the request is in writing, states the name and address of the applicant and describes the information, it should be treated as valid under section 8, even if that same request has been sent to other authorities at the same time.
+
+How should we treat requests for information in our publication scheme?
+A request for information included in a publication scheme is valid provided it is in writing, states the name and address of the applicant and describes the information. You could, however, refuse such a request under section 21 of FOIA on the grounds that the information is reasonably accessible to the requester by other means.
+
+If you choose to apply section 21, then we expect you to provide the requester with details on how to obtain the information through your publication scheme.
+
+For further information please read our guidance Information reasonably accessible to the applicant by other means (section 21).
+
+What are our obligations to provide advice and assistance where the request is invalid?
+If the request does not include a valid name, address or description then it is invalid. You also have no obligation to confirm or deny whether the information is held under section 1(1), or issue a formal refusal notice under section 17.
+
+Section 16 of FOIA does state, however, that you have a duty to provide advice and assistance, ‘…so far as it would be reasonable to expect the authority to do so, to persons who propose to make, or have made, requests for information to it’.
+
+We consider this duty to extend to requesters who have made invalid requests. We expect you to issue a prompt response to the requester, explaining why their request was invalid under section 8.
+
+Further information is available on your duty to provide advice and assistance.
+
+Further reading
+Guide to Data Protection
+Guide to the Environmental Information Regulations
+Dealing with vexatious requests
+Dealing with repeat requests
+Requests where the cost of compliance with a request exceeds the appropriate limit
+Information reasonably accessible to the applicant by other means (section 21)
+Duty to provide advice and assistance
+Consideration of the applicant’s identity or motives

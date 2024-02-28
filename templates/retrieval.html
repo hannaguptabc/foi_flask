@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieval Results</title>
+    <style>
+        body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+      }
+
+    
+
+      header {
+        background-color: #005eb8;
+        padding: 10px;
+        color: white;
+        border-radius: 8px 8px 0 0;
+      }
+
+      h1,
+      h2 {
+        margin: 0;
+      }
+
+      h2 {
+        color: #333;
+        margin-top: 10px; /* Provide a bit of space between header and h2 */
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #005eb8;
+        color: white;
+      }
+
+      button,
+      a.button {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+      }
+
+      button {
+        background-color: #005eb8;
+        margin-right: 10px; /* Add a bit of spacing between button and link */
+      }
+
+      button:hover,
+      a.button:hover {
+        background-color: #004080; /* Darker shade on hover */
+      }
+
+      p {
+        margin-top: 20px;
+        font-size: 16px;
+      }
+
+      /* styles for the modal */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 1rem;
+      }
+      #modal-text {
+        text-align: left;
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      #feedback-text {
+        margin-top: 10px;
+        padding: 10px;
+        box-sizing: border-box;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 100%;
+      }
+
+      #modal-actions {
+        display: flex;
+        gap: 1rem;
+        padding-top: 15px;
+      }
+
+      #modal-actions button {
+        margin: 0;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #approve-btn {
+        background-color: #4caf50; /* Green */
+        color: white;
+      }
+
+      #reject-btn {
+        background-color: #f44336; /* Red */
+        color: white;
+      }
+
+      #submit-feedback {
+        display: block;
+        background-color: #008cba; /* Blue */
+        color: white;
+      }
+      #print-response-btn {
+        background-color: #005eb8; /* Blue */
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+
+      #print-response-btn:hover {
+            background-color: #004080; /* Darker shade on hover */
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: "Poppins", sans-serif;
+            color: #333;
+            line-height: 1.6;
+        } 
+
+        .header {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header img {
+            height: 70px;
+        }
+
+        .wrapper {
+            padding: calc(100px + 40px) 20px 20px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            padding: 40px;
+            margin-top: 20px;
+        }
+
+        .input-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            color: #0066cc;
+        }
+
+        .input-container input[type="text"],
+        .input-container textarea,
+        .input-container input[type="datetime-local"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0077cc;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        tbody td {
+            border-bottom: 1px solid #ddd; /* Add a light border bottom */
+            padding: 10px 0; /* Adjust padding as needed */
+            }
+
+        .input-container textarea {
+            resize: vertical;
+            height: 150px;
+        }
+
+        .input-container input[type="text"]:focus,
+        .input-container textarea:focus,
+        .input-container input[type="datetime-local"]:focus {
+            border-color: #0056b3;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+        }
+
+        .button-container input[type="submit"] {
+            background-color: #0066cc;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+            display: block;
+            width: 100%;
+            font-size: 18px;
+        }
+
+        .button-container input[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 20px;
+        }
+
+        .btn-wrapper button, .logout-btn {
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            background-color: #0077cc;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 700;
+        }
+
+        .btn-wrapper button:hover, .logout-btn:hover {
+            background-color: #0066cc;
+            transform: translateY(-3px);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 20px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+        th:last-child, td:last-child {
+            text-align: center; /* Center align the content in the last column */
+        }
+        .blue-box {
+            background-color: #0066cc;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
+        
+        <div><img src="static/image.png" alt="NHS Logo"/></div>
+        <button class="logout-btn">Logout</button>
+    </header>
+<div class="wrapper">
+<div class="container">
+    <h2>Retrieval Results</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Request</th>
+            <th>Response</th>
+            <th>Exemption Details</th>
+        </tr>
+        </thead>
+        <tbody id="table-body">
+        <!-- Rows will be added here -->
+        {% for row in responses %}
+        <tr>
+            <td>{{ row.request }}</td>
+            <td>{{ row.response }}</td>
+            <td>
+                {% if row.exemptions %}
+                {% for exemption in row.exemptions %}
+                <button class="exemption-btn" data-redaction="{{ exemption.evidence }}">{{ exemption.section }}</button><br>
+                {% endfor %}
+                {% else %}
+                No exemptions
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="btn-wrapper">
+        <form action="/retrieval" method="get">
+            <button type="submit" class="button">Previous</button>
+        </form>
+        <form action="/response" method="post">
+            <input type="hidden" name="responses" value="{{ responses }}">
+            <button type="submit" class="button">Next</button>
+        </form>
+    </div>
+
+    <div id="exemptionModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p id="modal-text"></p>
+            <textarea id="feedback-text" placeholder="Provide feedback here..." rows="10" cols="30"></textarea>
+            <div id="modal-actions">
+                <button id="submit-feedback">Submit Feedback</button>
+                <button id="approve-btn">✔ Approve</button>
+                <button id="reject-btn">✖ Reject</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
+<script>
+    // Get the modal
+    var modal = document.getElementById('exemptionModal');
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName('close')[0];
+
+    // Get all exemption buttons
+    var exemptionButtons = document.querySelectorAll('.exemption-btn');
+
+    // Add click event listener to each exemption button
+    exemptionButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var redaction = this.getAttribute('data-redaction');
+            document.getElementById('modal-text').innerText = redaction;
+            modal.style.display = 'block';
+        });
+    });
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = 'none';
+    };
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+    document.querySelector('.logout-btn').addEventListener('click', function() {
+            window.location.href = "/logout"; // Redirect to the /logout route
+        });
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Response Letter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Change flex direction to column */
+            height: 100vh; /* Set container height to full viewport height */
+        }
+
+        .response-container, .acknowledgment-container {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Center align content */
+            margin-bottom: 20px; /* Add margin between containers */
+}
+
+        header {
+            background-color: #005eb8;
+            padding: 20px;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        h1, h2 {
+            margin: 0;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 10px; /* Provide a bit of space between header and h2 */
+        }
+
+        .custom-textarea {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 16px;
+            resize: none; /* Prevent resizing */
+            transition: border-color 0.3s ease; /* Smooth transition on hover/focus */
+            height: 200px; /* Adjust the height as needed  */
+        }
+
+        .custom-textarea:focus,
+        .custom-textarea:hover {
+            border-color: #005eb8; /* Highlight border on hover/focus */
+            outline: none; /* Remove default focus outline */
+        }
+
+        .custom-button {
+            display: inline-block;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #005eb8;
+            transition: background-color 0.3s ease; /* Smooth transition on hover */
+            margin-top: 10px; /* Add margin */
+        }
+
+        .custom-button:hover {
+            background-color: #004080; /* Darker shade on hover */
+        }
+
+        p {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: "Poppins", sans-serif;
+            color: #333;
+            line-height: 1.6;
+        } 
+
+        .header {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header img {
+            height: 70px;
+        }
+
+        .wrapper {
+            padding: calc(100px + 40px) 20px 20px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            padding: 40px;
+            margin-top: 20px;
+        }
+
+        .input-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            color: #0066cc;
+        }
+
+        .input-container input[type="text"],
+        .input-container textarea,
+        .input-container input[type="datetime-local"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0077cc;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        tbody td {
+            border-bottom: 1px solid #ddd; /* Add a light border bottom */
+            padding: 10px 0; /* Adjust padding as needed */
+            }
+
+        .input-container textarea {
+            resize: vertical;
+            height: 150px;
+        }
+
+        .input-container input[type="text"]:focus,
+        .input-container textarea:focus,
+        .input-container input[type="datetime-local"]:focus {
+            border-color: #0056b3;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+        }
+
+        .button-container input[type="submit"] {
+            background-color: #0066cc;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+            display: block;
+            width: 100%;
+            font-size: 18px;
+        }
+
+        .button-container input[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 20px;
+        }
+
+        .btn-wrapper button, .logout-btn {
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            background-color: #0077cc;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 700;
+        }
+
+        .btn-wrapper button:hover, .logout-btn:hover {
+            background-color: #0066cc;
+            transform: translateY(-3px);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 20px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+        th:last-child, td:last-child {
+            text-align: center; /* Center align the content in the last column */
+        }
+        .blue-box {
+            background-color: #0066cc;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
+        
+        <div><img src="static/image.png" alt="NHS Logo"/></div>
+        <button class="logout-btn">Logout</button>
+    </header>
+    
+    <div class="container">
+        <div class="response-container">
+            <h2>Response Letter</h2>
+            <textarea id="responseTextarea" class="custom-textarea" rows="10" cols="50">{{ response }}</textarea><br>
+            <button class="custom-button" onclick="saveAndDownloadResponse()">Download Response</button> <!-- Added button for response -->
+        </div>
+        <div class="acknowledgment-container">
+            <h2>Acknowledgment Letter</h2>
+            <textarea id="acknowledgmentTextarea" class="custom-textarea" rows="10" cols="50">{{ acknowledgment_text }}</textarea><br>
+            <button class="custom-button" onclick="saveAndDownloadAcknowledgment()">Download Acknowledgment</button> <!-- Added button for acknowledgment -->
+        </div>
+    </div>
+
+    <a href="/" class="custom-button"><i class="fas fa-home"></i> Home</a>
+
+    <script>
+        function saveAndDownloadResponse() {
+            const responseText = document.getElementById('responseTextarea').value;
+            downloadDocument(responseText, 'response.docx');
+        }
+
+        function saveAndDownloadAcknowledgment() {
+            const acknowledgmentText = document.getElementById('acknowledgmentTextarea').value;
+            downloadDocument(acknowledgmentText, 'acknowledgment.docx');
+        }
+
+        function downloadDocument(text, filename) {
+            fetch('/save_document', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text, filename: filename }),
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            window.location.href = "/logout"; // Redirect to the /logout route
+        });
+    </script>
+</body>
+</html>

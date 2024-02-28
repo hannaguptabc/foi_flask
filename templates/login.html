@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            height: 100vh; /* Full viewport height */
+            background-image: url('static/premium_photo-1673589625805-eaafd711a942.jpg'); /* Set background image */
+            background-size: cover; /* Cover entire viewport */
+            background-position: center; /* Center the image */
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background for the container */
+            border-radius: 10px; /* Rounded corners */
+            padding: 40px; /* Increased padding */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        header {
+            background-color: #005eb8;
+            padding: 20px; /* Increased padding */
+            color: white;
+            margin-bottom: 30px; /* Increased margin */
+            width: calc(100% - 80px); /* Adjusted width to match input boxes */
+            margin-left: auto; /* Align header to right */
+            margin-right: auto; /* Align header to left */
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5em; /* Adjusted font size */
+            margin-bottom: 20px; /* Increased margin */
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 30px); /* Adjusted width to accommodate padding */
+            padding: 15px;
+            border: 1px solid #ddd; /* Light gray border */
+            border-radius: 5px; /* Rounded corners */
+            margin-bottom: 20px;
+            font-size: 16px;
+            transition: border-color 0.3s ease-in-out; /* Smooth border transition */
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #005eb8; /* Highlight border color on focus */
+            outline: none; /* Remove default focus outline */
+        }
+
+        input[type="submit"] {
+            background-color: #005eb8;
+            color: white;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease-in-out; /* Smooth background transition */
+        }
+
+        input[type="submit"]:hover {
+            background-color: #004080; /* Darker shade on hover */
+        }
+
+        .input-container {
+            text-align: left; /* Align labels and inputs to the left */
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block; /* Each label on its own line */
+            color: #333; /* Darker color for labels */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Login</h1>
+        </header>
+        
+        <form method="post" action="{{ url_for('login_page') }}">
+
+            <div class="input-container">
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username" placeholder="Enter your username">
+            </div>
+            <div class="input-container">
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" placeholder="Enter your password">
+            </div>
+            <div class="button-container">
+                <input type="submit" value="Login">
+            </div>
+        </form>
+        {% if login_failed %}
+        <div class="warning-popup">
+            <p>Invalid username or password. Please try again.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

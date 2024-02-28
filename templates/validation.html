@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOI Validation Result</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: "Poppins", sans-serif;
+            color: #333;
+            line-height: 1.6;
+        } 
+
+        .header {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header img {
+            height: 70px;
+        }
+
+        .wrapper {
+            padding: calc(100px + 40px) 20px 20px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+            padding: 40px;
+            margin-top: 20px;
+        }
+
+        .input-container label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 18px;
+            color: #0066cc;
+        }
+
+        .input-container input[type="text"],
+        .input-container textarea,
+        .input-container input[type="datetime-local"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #0077cc;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        tbody td {
+            border-bottom: 1px solid #ddd; /* Add a light border bottom */
+            padding: 10px 0; /* Adjust padding as needed */
+            }
+
+        .input-container textarea {
+            resize: vertical;
+            height: 150px;
+        }
+
+        .input-container input[type="text"]:focus,
+        .input-container textarea:focus,
+        .input-container input[type="datetime-local"]:focus {
+            border-color: #0056b3;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+        }
+
+        .button-container input[type="submit"] {
+            background-color: #0066cc;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+            display: block;
+            width: 100%;
+            font-size: 18px;
+        }
+
+        .button-container input[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 20px;
+        }
+
+        .btn-wrapper button, .logout-btn {
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            background-color: #0077cc;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 700;
+        }
+
+        .btn-wrapper button:hover, .logout-btn:hover {
+            background-color: #0066cc;
+            transform: translateY(-3px);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 20px;
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+        th:last-child, td:last-child {
+            text-align: center; /* Center align the content in the last column */
+        }
+        .blue-box {
+            background-color: #0066cc;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
+        <div><img src="static/image.png" alt="NHS Logo"/></div>
+        <button class="logout-btn">Logout</button>
+    </header>
+    <div class="wrapper">
+        <div class="container">
+            <h2>Validation Result</h2>
+            {% if validation_dict %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Can it be recognised as a valid FOI request?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for component, result in validation_dict.items() %}
+                            <tr>
+                                <td>{{ component }}</td>
+                                <td>{{ result }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="btn-wrapper">
+                    <form action="/identify_parts" method="get">
+                        <button type="submit">Previous</button>
+                      </form>
+                      <form action="/vexatious" method="post">
+                        <input type="hidden" name="validation_dict_json" value="{{ validation_dict }}" />
+                        <button type="submit">Next</button>
+                      </form>
+                </div>
+            {% else %}
+                <p>No validation result available.</p>
+            {% endif %}
+        </div>
+    </div>
+    <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
+    <script>
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            window.location.href = "/logout"; // Redirect to the /logout route
+        });
+    </script>
+</body>
+</html>
