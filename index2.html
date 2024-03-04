@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            font-family: 'Inter', sans-serif;
+            color: #333;
+        }
+
+        .header {
+            padding: 1rem 2rem;
+            background-color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .wrapper {
+            padding-top: calc(var(--navbar-height) + 2rem);
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            margin-top: 2rem;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,.1);
+        }
+
+        input[type="text"], textarea, input[type="datetime-local"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border: 2px solid #005eb8;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, textarea:focus, input[type="datetime-local"]:focus {
+            border-color: #004080;
+            outline: none;
+        }
+
+        input[type="submit"], .btn {
+            background-color: #005eb8;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover, .btn:hover {
+            background-color: #004080;
+        }
+
+        .btn-logout {
+            position: fixed;
+            top: 1rem;
+            right: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            background-color: #d9534f;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            font-size: 0.875rem;
+            color: #667788;
+            margin-top: 2rem;
+        }
+    </style>
+    <title>FOI</title>
+</head>
+<body>
+    <header class="header">
+        <div class="developer-details">
+            <img src="static/Logo-Primary.png" width="100px" alt="Developer Logo">
+        </div>
+        <div>
+            <img src="static/nhs-logo.png" width="100px" alt="NHS Logo">
+        </div>
+        <button class="btn-logout">Logout</button>
+    </header>
+    <div class="wrapper">
+        <div class="container">
+          <form method="post" action="/index">
+              <div class="input-container">
+                <label for="input_text">Please enter the request:</label>
+                <textarea
+                  name="input_text"
+                  id="input_text"
+                  placeholder="Enter text here"
+                ></textarea>
+              </div>
+              <div class="input-container">
+                <label for="email_id">Please enter the email id associated with the request:</label>
+                <input
+                  type="text"
+                  name="email_id"
+                  id="email_id"
+                  placeholder="Enter email id here"
+                />
+              </div>
+              <div class="input-container">
+                <label for="timestamp">Please enter the timestamp:</label>
+                <input type="datetime-local" name="timestamp" id="timestamp" />
+              </div>
+              <div class="button-container">
+                <input type="submit" value="Submit" />
+              </div>
+            </form>
+        </div>
+        <div class="btn-wrapper">
+          <button>Previous</button>
+          <button>Next</button>
+        </div>
+      </div>
+    <footer class="footer">
+        <p>Made with ❤️ by Agilisys</p>
+    </footer>
+</body>
+</html>

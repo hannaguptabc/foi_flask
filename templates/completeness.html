@@ -21,23 +21,40 @@
         } 
 
         .header {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
 
-        .header img {
-            height: 70px;
-        }
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
 
         .wrapper {
             padding: calc(100px + 40px) 20px 20px;
@@ -156,13 +173,29 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+        .department-dropdown {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            background-color: #fff;
+        }
+
+        .department-dropdown:focus {
+            border-color: #0066cc;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+        }
     </style>
 </head>
 <body>
     <header class="header">
-        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
-        
-        <div><img src="static/image.png" alt="NHS Logo"/></div>
+        <div class="developer-details">
+            <img src="static/Logo-Primary.png" width="100px" />
+          </div>
+          <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
+        <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
         <button class="logout-btn">Logout</button>
     </header>
     <div class="wrapper">
@@ -170,28 +203,57 @@
         <h2>Completeness Check</h2>
 
         {% if complete_dict %}
-            <table>
-                <thead>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Completeness</th>
+                    <th>Department</th>
+                    <th>Does this request exceed the statutory cost limit? If yes, enter the amount</th> <!-- New column header -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for component, result in complete_dict.items() %}
                     <tr>
-                        <th>Component</th>
-                        <th>Do we have all information?</th>
+                        <td style="text-align: center;">{{ component }}</td>
+                        <td style="text-align: center;">{{ result }}</td>
+                        <td style="text-align: center;">
+
+                            {% if result == "100%" %}
+                                <p>-</p>
+                            {% else %}
+                            <!-- <span class="department-name" data-index="{{ loop.index0 }}">{{ department_list[loop.index0] }}</span> -->
+                                <select name="department{{ loop.index }}" class="department-dropdown" style="width: 240px;">
+                                    <option value="-" selected="{{department_list[loop.index0]}}">Select Department</option>
+                                    {% for service in services %}
+                                        {% if service == department_list[loop.index0] %}
+                                            <option value="{{ service }}" selected>{{ service }}</option>
+                                        {% else %} 
+                                            <option value="{{ service }}">{{ service }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            
+                            <select name="cost_limit{{ loop.index }}"  class="cost-limit-dropdown">
+                                <option value="No" selected>No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </form>
+                        </td> <!-- New column with input text box -->
                     </tr>
-                </thead>
-                <tbody>
-                    {% for component, result in complete_dict.items() %}
-                        <tr>
-                            <td>{{ component }}</td>
-                            <td>{{ result }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                {% endfor %}
+            </tbody>
+        </table>
 
             <div class="btn-wrapper">
                 <form action="/completeness" method="get">
                     <button type="submit" class="button">Previous</button>
                 </form>
-                <form action="/retrieval" method="post">
+                <form action="/retrieval" method="post" id="completeness-form">
+                    <input type="hidden" name="cost_limit">
                     <button type="submit" class="button">Next</button>
                 </form>
             </div>
@@ -209,6 +271,87 @@
         document.querySelector('.logout-btn').addEventListener('click', function() {
             window.location.href = "/logout"; // Redirect to the /logout route
         });
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+        console.log("{{complete_dict}}");
+        // Get all department name spans
+        const departmentNames = document.querySelectorAll('.department-name');
+
+        // Add click event listener to each department name span
+        departmentNames.forEach(function(departmentName) {
+            departmentName.addEventListener('click', function() {
+                // Hide all dropdowns
+                const allDropdowns = document.querySelectorAll('.department-dropdown');
+                allDropdowns.forEach(function(dropdown) {
+                    dropdown.style.display = 'none';
+                });
+
+                // Show the corresponding dropdown
+                const index = departmentName.getAttribute('data-index');
+                const dropdown = document.querySelector('select[name="department' + index + '"]');
+                dropdown.style.display = 'block';
+
+                // Hide the department name span
+                departmentName.style.display = 'none';
+            });
+        });
+
+        // Add change event listener to all dropdowns
+        const dropdowns = document.querySelectorAll('.department-dropdown');
+        dropdowns.forEach(function(dropdown) {
+            dropdown.addEventListener('change', function() {
+                // Get the selected option value
+                const selectedDepartment = this.value;
+
+                // Update the corresponding department name span
+                const index = this.name.match(/\d+/)[0];
+                const departmentNameSpan = document.querySelector('.department-name[data-index="' + index + '"]');
+                departmentNameSpan.textContent = selectedDepartment;
+
+                // Hide the dropdown after selection
+                this.style.display = 'none';
+
+                // Show the department name span
+                departmentNameSpan.style.display = 'inline';
+            });
+        });
+    });
+    const costLimitDropdowns = document.querySelectorAll('.cost-limit-dropdown');
+
+// Iterate over each dropdown
+    const selectedValues = [];
+    costLimitDropdowns.forEach(function(dropdown) {
+    const selectedValue = dropdown.value;
+    selectedValues.push(selectedValue);
+    });
+
+    // Convert the array to JSON string and set it as the value of the hidden input field
+    const hiddenInput = document.querySelector('input[name="cost_limit"]');
+    hiddenInput.value = JSON.stringify(selectedValues);
+
+    
+
+// Iterate over each dropdown
+    costLimitDropdowns.forEach(function(dropdown, index) {
+        dropdown.addEventListener('change', function() {
+            // Get the selected value
+            const selectedValue = this.value;
+
+            // Set the value of the hidden input field
+            const allValues = []
+            for(let i = 0;i<costLimitDropdowns.length;++i){
+                const hiddenInput = document.querySelector(`input[name="cost_limit${i}"]`);
+                allValues.push(hiddenInput)
+            }
+            console.log(allValues);
+            hiddenInput.value = JSON.stringify(allValues);
+        });
+    });
+    costLimitDropdowns.forEach(function(dropdown) {
+        dropdown.addEventListener('change', function() {
+            form.submit();
+        });
+    });
     </script>
 </body>
 </html>

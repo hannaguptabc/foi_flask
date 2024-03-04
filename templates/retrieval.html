@@ -1,422 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retrieval Results</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body {
-        font-family: "Arial", sans-serif;
-        background-color: #f4f4f4;
-        color: #333;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
         margin: 0;
+        padding: 0;
       }
 
-    
-
-      header {
-        background-color: #005eb8;
-        padding: 10px;
-        color: white;
-        border-radius: 8px 8px 0 0;
+      :root {
+        --navbar-height: 60px;
       }
 
-      h1,
-      h2 {
-        margin: 0;
-      }
-
-      h2 {
-        color: #333;
-        margin-top: 10px; /* Provide a bit of space between header and h2 */
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: center;
-      }
-
-      th {
-        background-color: #005eb8;
-        color: white;
+      body {
+        background-color: #fbfdff;
+        font-family: "Inter", sans-serif;
+        position: relative;
+        color: #1c2024;
       }
 
       button,
-      a.button {
-        display: inline-block;
-        margin-top: 20px;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        color: #fff;
-        font-weight: bold;
-        cursor: pointer;
-        border: none;
-        border-radius: 5px;
+      input {
+        font-family: "Inter", sans-serif;
       }
 
-      button {
-        background-color: #005eb8;
-        margin-right: 10px; /* Add a bit of spacing between button and link */
-      }
-
-      button:hover,
-      a.button:hover {
-        background-color: #004080; /* Darker shade on hover */
-      }
-
-      p {
-        margin-top: 20px;
-        font-size: 16px;
-      }
-
-      /* styles for the modal */
-      .modal {
-        display: none;
+      .header {
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
         position: fixed;
-        z-index: 1;
-        left: 0;
         top: 0;
+        left: 0;
+        right: 0;
+      }
+
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
+
+      .wrapper {
+        width: 90%;
+        min-width: 250px;
+        max-width: 1200px;
+        padding: calc(var(--navbar-height) + 3rem) 1rem 0rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+      }
+
+      .container {
+        /* background-color: white; */
         width: 100%;
         height: 100%;
-        overflow: auto;
-        background-color: rgb(0, 0, 0);
-        background-color: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+        margin: auto;
+        /* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; */
+        padding: 2rem 1rem;
       }
+
+      .question-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+      }
+
+      .question-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 1rem;
+      }
+
+      .question-container .label {
+        font-weight: 600;
+        font-size: 16px;
+        color: #1c2024;
+      }
+
+      .question-container .content {
+        font-size: 14px;
+        color: #1c2024;
+        /* padding-bottom: 1rem; */
+        /* border-bottom: 1px solid #cecece; */
+      }
+
+      .answer-section {
+        padding-top: 1rem;
+        display: grid;
+        grid-template-columns: 4fr 4fr 2fr;
+        gap: 1rem;
+        height: 400px;
+      }
+
+      .answer-container h2 {
+        font-size: 14px;
+        color: #1c2024;
+        padding-bottom: 0.5rem;
+      }
+
+      .answer {
+        border: none;
+        font-family: "Inter", sans-serif;
+        padding: 1rem;
+        width: 100%;
+        height: 400px;
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+          rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+      }
+
+      .exemptions-container {
+        /* flex: 3; */
+        /* display: grid; */
+        /* gap: 1rem; */
+        /* grid-template-rows: 1fr 1fr; */
+        height: 430px;
+      }
+
+      .exemptions-container h2 {
+        font-size: 14px;
+        color: #1c2024;
+        padding-bottom: 0.5rem;
+      }
+
+      .exemptions-container .section {
+        display: flex;
+        flex-direction: column;
+        height: calc(50% - 10px);
+      }
+
+      .section1 {
+        margin-bottom: 1rem;
+      }
+
+      .exemptions {
+        background-color: #fff;
+        height: 100%;
+        flex: 1;
+        overflow-y: scroll;
+        /* padding: 1rem 0; */
+        /* padding: 1rem; */
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+          rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+      }
+
+      .exemptions .name {
+        padding: 1rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+
+        border-bottom: 1px solid #cecece;
+        cursor: pointer;
+        font-size: 14px;
+        max-width: 250px;
+
+        &:hover {
+          background-color: rgb(30 41 59);
+          color: white;
+        }
+      }
+
+      .exemptions .name.approved {
+        background-color: rgb(187 247 208);
+        color: rgb(5 46 22);
+      }
+
+      .exemptions .name.rejected {
+        background-color: rgb(252 165 165);
+        color: rgb(69 10 10);
+      }
+
+      .overlay {
+        background-color: rgba(0, 0, 0, 0.3);
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        inset: 0;
+      }
+
+      .modal {
+        width: 600px;
+        height: 300px;
+        background-color: white;
+        border-radius: 6px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
       .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 600px;
-        border-radius: 1rem;
+        padding-top: 1rem;
       }
-      #modal-text {
-        text-align: left;
+
+      .modal-btns-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
       }
-      .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
+
+      .modal-btns-container button {
+        padding: 6px 12px;
+        font-size: 13px;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
       }
-      .close:hover,
-      .close:focus {
-        color: black;
-        text-decoration: none;
+
+      .approve {
+        background-color: rgb(187 247 208);
+        color: rgb(5 46 22);
+      }
+
+      .reject {
+        background-color: rgb(252 165 165);
+        color: rgb(69 10 10);
+      }
+
+      .modal-header img {
         cursor: pointer;
       }
 
-      #feedback-text {
-        margin-top: 10px;
-        padding: 10px;
-        box-sizing: border-box;
-        border-radius: 5px;
-        border: 1px solid #ccc;
+      .redacted-text {
+        font-size: 14px;
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        max-height: 150px;
+        height: 100%;
+        overflow-y: scroll;
+      }
+
+      .regen-btn-container {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .regen-btn-container button {
+        border: 1px solid transparent;
+        background-color: #0d74ce;
+        color: white;
+        cursor: pointer;
+        transition: all 0.4s;
+        padding: 8px 12px;
+        border-radius: 6px;
+
+        &:hover {
+          border: 1px solid #0d74ce;
+          background-color: white;
+          color: #0d74ce;
+        }
+      }
+
+      .btn-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 2rem 0rem;
         width: 100%;
       }
 
-      #modal-actions {
-        display: flex;
-        gap: 1rem;
-        padding-top: 15px;
-      }
-
-      #modal-actions button {
-        margin: 0;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
+      .btn-wrapper button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        background-color: #0d74ce;
+        color: white;
         cursor: pointer;
+        transition: all 0.4s;
       }
 
-      #approve-btn {
-        background-color: #4caf50; /* Green */
-        color: white;
+      .btn-wrapper button:hover {
+        border: 1px solid #0d74ce;
+        background-color: white;
+        color: #0d74ce;
       }
 
-      #reject-btn {
-        background-color: #f44336; /* Red */
-        color: white;
+      .footer {
+        text-align: center;
+        width: 100%;
+        font-size: 12px;
+        color: #b9bbc6;
+        padding: 0rem 1rem 1rem 1rem;
       }
-
-      #submit-feedback {
-        display: block;
-        background-color: #008cba; /* Blue */
-        color: white;
-      }
-      #print-response-btn {
-        background-color: #005eb8; /* Blue */
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 20px;
-      }
-
-      #print-response-btn:hover {
-            background-color: #004080; /* Darker shade on hover */
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: #f0f4f8;
-            font-family: "Poppins", sans-serif;
-            color: #333;
-            line-height: 1.6;
-        } 
-
-        .header {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-
-        .header img {
-            height: 70px;
-        }
-
-        .wrapper {
-            padding: calc(100px + 40px) 20px 20px;
-            max-width: 960px;
-            margin: 0 auto;
-        }
-
-        .container {
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-            padding: 40px;
-            margin-top: 20px;
-        }
-
-        .input-container label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-size: 18px;
-            color: #0066cc;
-        }
-
-        .input-container input[type="text"],
-        .input-container textarea,
-        .input-container input[type="datetime-local"] {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #0077cc;
-            margin-bottom: 20px;
-            font-size: 16px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        tbody td {
-            border-bottom: 1px solid #ddd; /* Add a light border bottom */
-            padding: 10px 0; /* Adjust padding as needed */
-            }
-
-        .input-container textarea {
-            resize: vertical;
-            height: 150px;
-        }
-
-        .input-container input[type="text"]:focus,
-        .input-container textarea:focus,
-        .input-container input[type="datetime-local"]:focus {
-            border-color: #0056b3;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
-        }
-
-        .button-container input[type="submit"] {
-            background-color: #0066cc;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-            display: block;
-            width: 100%;
-            font-size: 18px;
-        }
-
-        .button-container input[type="submit"]:hover {
-            background-color: #0056b3;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-wrapper {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 20px;
-        }
-
-        .btn-wrapper button, .logout-btn {
-            padding: 12px 18px;
-            border-radius: 10px;
-            border: none;
-            background-color: #0077cc;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            font-weight: 700;
-        }
-
-        .btn-wrapper button:hover, .logout-btn:hover {
-            background-color: #0066cc;
-            transform: translateY(-3px);
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 14px;
-            color: #999;
-            padding: 20px;
-        }
-
-        .logout-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1100;
-        }
-        th:last-child, td:last-child {
-            text-align: center; /* Center align the content in the last column */
-        }
-        .blue-box {
-            background-color: #0066cc;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
     </style>
-</head>
-<body>
+    <title>FOI</title>
+  </head>
+  <body>
     <header class="header">
-        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
-        
-        <div><img src="static/image.png" alt="NHS Logo"/></div>
-        <button class="logout-btn">Logout</button>
+      <div class="developer-details">
+        <img src="static/Logo-Primary.png" width="100px" />
+      </div>
+      <div><img src="static/image.png" width="100px" /></div>
     </header>
-<div class="wrapper">
-<div class="container">
-    <h2>Retrieval Results</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>Request</th>
-            <th>Response</th>
-            <th>Exemption Details</th>
-        </tr>
-        </thead>
-        <tbody id="table-body">
-        <!-- Rows will be added here -->
-        {% for row in responses %}
-        <tr>
-            <td>{{ row.request }}</td>
-            <td>{{ row.response }}</td>
-            <td>
-                {% if row.exemptions %}
-                {% for exemption in row.exemptions %}
-                <button class="exemption-btn" data-redaction="{{ exemption.evidence }}">{{ exemption.section }}</button><br>
-                {% endfor %}
-                {% else %}
-                No exemptions
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <div class="btn-wrapper">
-        <form action="/retrieval" method="get">
-            <button type="submit" class="button">Previous</button>
-        </form>
-        <form action="/response" method="post">
-            <input type="hidden" name="responses" value="{{ responses }}">
-            <button type="submit" class="button">Next</button>
-        </form>
-    </div>
+    <div class="wrapper">
+      <div class="container">
+        {% for item in responses %}
+        <div class="question-wrapper">
+          
+            <div class="question-container" id="question-cont-{{loop.index}}">
+              <p class="label">Question {{ loop.index }}.</p>
+              <p class="content">{{ item['request'] }}</p>
+              <div class="answer-section">
+                <div class="answer-container">
+                  <h2>Un-redacted Answer</h2>
+                  <textarea class="answer" id="unredacted-answer" >{{ item['response'] }}</textarea>
+                </div>
+                <div class="answer-container">
+                  <h2>Answer</h2>
+                  <textarea class="answer" id="answer" >{{ item['response'] }}</textarea>
+                </div>
 
-    <div id="exemptionModal" class="modal">
-        <!-- Modal content -->
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p id="modal-text"></p>
-            <textarea id="feedback-text" placeholder="Provide feedback here..." rows="10" cols="30"></textarea>
-            <div id="modal-actions">
-                <button id="submit-feedback">Submit Feedback</button>
-                <button id="approve-btn">✔ Approve</button>
-                <button id="reject-btn">✖ Reject</button>
+                {% if item.exemptions %}
+                <div class="exemptions-container">
+                  <div class="section section1">
+                    <h2>AI Generated Exemptions</h2>
+                    <div class="exemptions" id="ai-exemptions">
+                      {% for exemption, evidence in item.exemptions.items() %}
+                      <div class="name" id="ai-exemption-index">
+                        {{ exemption }}
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% for exemption, evidence in item.exemptions.items() %}
+                  <div
+                  class="overlay"
+                  id="ai-exemption-overlay"
+                  style="display: none"
+                  >
+                    <div class="modal" id="ai-exemption-modal">
+                      <div class="top-section">
+                        <div class="modal-header">
+                          <h3 class="heading">
+                            {{ exemption }}
+                          </h3>
+                          <img
+                            src="static/close.svg"
+                            width="25"
+                            height="25"
+                            id="ai-exemption-modal-close-icon"
+                          />
+                        </div>
+                        <div class="modal-content">
+                          <h2>Evidence</h2>
+                          <div class="redacted-text" id="redacted-text">{{ evidence }}</div>
+                        </div>
+                      </div>
+                      <div class="modal-btns-container">
+                        <button class="approve" id="ai-approve-btn">Approve</button>
+                        <button class="reject" id="ai-reject-btn">Reject</button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                  {% endif %}
+                  <div class="section">
+                    <h2>Add your own Exemptions</h2>
+                    <div class="exemptions" id="own-exemptions">
+                      {% for red in redactions %}
+                        <div class="name" id="own-exemption-index">{{red}}</div>
+                      {% endfor %}
+                    </div>
+                  </div>
+
+                  {% for red in redactions %}
+                  <div
+                    class="overlay"
+                    id="own-exemption-overlay"
+                    style="display: none"
+                  >
+                    <div class="modal" id="own-exemption-modal">
+                      <div class="top-section">
+                        <div class="modal-header">
+                          <h3 class="heading">
+                            {{ red }}
+                          </h3>
+                          <img
+                            src="static/close.svg"
+                            width="25"
+                            height="25"
+                            id="own-exemption-modal-close-icon"
+                          />
+                        </div>
+                        <div class="modal-content">
+                          <h2>Answer</h2>
+                          <div class="redacted-text" id="redacted-text">
+                            {{ item.response }}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-btns-container">
+                        <button class="approve" id="own-approve-btn">
+                          Add Exemption
+                        </button>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
             </div>
+          
+          <div class="regen-btn-container">
+            <button>Regenerate Response</button>
+          </div>
+          
         </div>
+        {% endfor %}
+      </div>
+
+      <div class="btn-wrapper">
+        <button>Previous</button>
+        <button>Next</button>
+      </div>
     </div>
-</div>
-</div>
-<footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
-<script>
-    // Get the modal
-    var modal = document.getElementById('exemptionModal');
+    <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
+    <script>
 
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName('close')[0];
 
-    // Get all exemption buttons
-    var exemptionButtons = document.querySelectorAll('.exemption-btn');
+      const redactionStatus = {
+        pending: "PENDING",
+        approved: "APPROVED",
+        rejected: "REJECTED",
+      };
 
-    // Add click event listener to each exemption button
-    exemptionButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            var redaction = this.getAttribute('data-redaction');
-            document.getElementById('modal-text').innerText = redaction;
-            modal.style.display = 'block';
+
+      document.addEventListener('DOMContentLoaded', function(){
+
+
+      // function decodeHTML(html) {
+      //   var txt = document.createElement("textarea");
+      //   txt.innerHTML = html;
+      //   return txt.value;
+      // }
+
+
+      const questionsContainerList = document.querySelectorAll('.question-container')
+
+      console.log(questionsContainerList);
+      console.log("{{responses_json}}");
+
+
+      questionsContainerList.forEach((questionsContainer) => {
+
+      const AIGeneratedExemptions = questionsContainer.querySelectorAll("div[id^=ai-exemption-index]");
+      const redactedText = questionsContainer.querySelector("#redacted-text");
+      const aiExemptionOverlay = questionsContainer.querySelector("#ai-exemption-overlay");
+      const aiExemptionModal = questionsContainer.querySelector("#ai-exemption-modal");
+      const aiExemptionModalClose = questionsContainer.querySelector("#ai-exemption-modal-close-icon");
+      const approveAIRedactionBtn = questionsContainer.querySelector("#ai-approve-btn");
+      const addExemptionBtn = questionsContainer.querySelector("#own-approve-btn");
+
+      const rejectAIRedactionBtn = questionsContainer.querySelector("#ai-reject-btn");
+
+      let selectedExemptionIndex = null;
+      
+      const closeAIExemptionModal = () => {
+        aiExemptionOverlay.style.display = "none";
+        selectedExemptionIndex = null;
+      };
+
+      const openAIExemptionModal = () => {
+        aiExemptionOverlay.style.display = "flex";
+      };
+
+      aiExemptionModalClose.addEventListener("click", closeAIExemptionModal);
+
+      AIGeneratedExemptions.forEach((exemption, index) => {
+        exemption.setAttribute("id", `ai-exemption-${index}`);
+        exemption.addEventListener("click", () => {
+          selectedExemptionIndex = index;
+          openAIExemptionModal();
         });
-    });
+      });
 
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = 'none';
-    };
+      const ownExemptions = questionsContainer.querySelector("#own-exemptions");
+      const ownExemptionOverlay = questionsContainer.querySelector("#own-exemption-overlay"
+      );
+      const ownExemptionModal =questionsContainer.querySelector("#ai-exemption-modal");
+      const ownExemptionModalClose = questionsContainer.querySelector("#own-exemption-modal-close-icon"
+      );
 
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
+      const ALL_EXEMPTIONS = questionsContainer.querySelectorAll('#own-exemption-index')
+
+      const closeOwnExemptionModal = () => {
+        ownExemptionOverlay.style.display = "none";
+        selectedExemptionIndex = null;
+      };
+
+      const openOwnExemptionModal = () => {
+        ownExemptionOverlay.style.display = "flex";
+      };
+
+      ALL_EXEMPTIONS.forEach((exemption, index) => {
+        exemption.setAttribute("id", `own-exemption-${index}`);
+        exemption.addEventListener("click", () => {
+          selectedExemptionIndex = index;
+          openOwnExemptionModal();
+        });
+      });
+
+      ownExemptionModalClose.addEventListener("click", closeOwnExemptionModal);
+
+      var TextHighlighter = (function() {
+        var selectedText = '';
+
+        function highlightSelectedText(color) {
+            if (!selectedText) return;
+
+            var selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                var range = selection.getRangeAt(0);
+                var span = document.createElement('span');
+                span.style.backgroundColor = color;
+                span.classList.add('highlighted');
+                range.surroundContents(span);
+            }
         }
-    };
-    document.querySelector('.logout-btn').addEventListener('click', function() {
-            window.location.href = "/logout"; // Redirect to the /logout route
-        });
-</script>
-</body>
+
+        function captureSelection() {
+            selectedText = window.getSelection().toString();
+        }
+
+        function init() {
+            document.addEventListener('mouseup', captureSelection);
+        }
+
+        return {
+            init: init,
+            highlight: highlightSelectedText
+        };
+    })();
+
+      TextHighlighter.init();
+
+
+
+      addExemptionBtn.addEventListener("click", () => {
+        if (selectedExemptionIndex == null) {
+          console.error("No selected exemption found");
+        }
+
+        const selectedText = window.getSelection().toString();
+        console.log(selectedText);
+        const selectedExemption = document.getElementById(
+            `own-exemption-${selectedExemptionIndex}`
+          );
+          selectedExemption.classList.add("approved");
+        
+
+        const unredactedAnswer = questionsContainer.querySelector('#unredacted-answer')
+        const answer = questionsContainer.querySelector('#answer')
+
+        const prevAnswer = answer.textContent.trim();
+        const newAnswer = prevAnswer.replace(selectedText.trim(),'')
+
+        if(newAnswer == null || newAnswer == ''){
+          const ownExemptionsList = ownExemptions.querySelectorAll('.approved')
+          
+          let combinedSectionsString = ''
+
+          console.log(ownExemptionsList);
+
+          if(ownExemptionsList.length>1){
+            console.log(ownExemptionsList);
+
+            for(let i = 0;i<ownExemptionsList.length;++i){
+              if(i<ownExemptionsList.length-1){
+                combinedSectionsString += (', '+ ownExemptionsList[i].textContent)
+              }
+              else{
+                combinedSectionsString += ('and '+ ownExemptionsList[i].textContent)
+              }
+            }
+            console.log(combinedSectionsString);
+        }
+        else{
+          combinedSectionsString = ownExemptionsList[0].textContent.trim().replaceAll('\n', '')
+          console.log(combinedSectionsString);
+        }
+
+          answer.value = `We would not be able to answer your request under ${combinedSectionsString.trim().replaceAll('\n', '')}.`
+          answer.textContent = `We would not be able to answer your request under ${combinedSectionsString.trim().replaceAll('\n', '')}.`
+
+        }
+        else {
+          answer.value = newAnswer
+          answer.textContent = newAnswer
+        }
+
+      
+        // closeAIExemptionModal();
+      });
+    })
+
+      })
+
+      
+    </script>
+  </body>
 </html>

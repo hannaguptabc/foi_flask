@@ -26,23 +26,40 @@
         } 
 
         .header {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
 
-        .header img {
-            height: 70px;
-        }
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
 
         .wrapper {
             padding: calc(100px + 40px) 20px 20px;
@@ -163,8 +180,11 @@
   </head>
   <body>
     <header class="header">
-        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
-        <div><img src="static/image.png" alt="NHS Logo"/></div>
+      <div class="developer-details">
+        <img src="static/Logo-Primary.png" width="100px" />
+      </div>
+      <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
+    <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
         <button class="logout-btn">Logout</button>
     </header>
     <div class="wrapper">

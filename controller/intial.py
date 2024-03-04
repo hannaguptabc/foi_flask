@@ -13,6 +13,8 @@ import bcrypt
 import asyncio
 import ast
 import fitz
+import json
+from flask import jsonify
 from langchain_community.vectorstores.pgvector import PGVector
 from langchain_openai.embeddings import AzureOpenAIEmbeddings
 application.secret_key='32qwe34ds'
@@ -33,11 +35,12 @@ client=AsyncAzureOpenAI(api_key = os.getenv("openai_api_key"),
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
     driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
     host=os.environ.get("PGHOST"),
-    port=int(os.environ.get("PGPORT")),
+    port=os.environ.get("PGPORT"),
     database=os.environ.get("PGDATABASE"),
     user=os.environ.get("PGUSER"),
     password=os.environ.get("PGPASSWORD"),
 )
+
 
 EMBEDDINGS = AzureOpenAIEmbeddings(
     azure_endpoint=os.getenv('AZURE_OPENAI_ENDPOINT'),
@@ -47,7 +50,11 @@ EMBEDDINGS = AzureOpenAIEmbeddings(
 NAMESPACE = "pgvector/foi_corpus"
 COLLECTION_NAME = 'FOI-CORPUS'
 
-
+vectorstore = PGVector(
+        collection_name=COLLECTION_NAME,
+        connection_string=CONNECTION_STRING,
+        embedding_function=EMBEDDINGS,
+    )
 
 class User:
     def __init__(self, id: int, username: str, hashed_password: str, created_at: datetime):
@@ -177,6 +184,7 @@ async def check_full_name(text: str):
     In case the request contains an honorific(such as Mr. or Mrs. or Dr. or Miss) and the last time along with it, then you should return True.
     In case the request only contains the first name of a person or a nickname then you need to return False.
     For example if the request contains "Tom Cruise" then return True, if the text contains "Mr. Cruise" then also return True but if it contains "Tom" then return False.
+    The request you need to check for the name is given ahead enclosed in double qoutes="{text}"
 '''
     response =await client.chat.completions.create(
         model="gpt-4-1106",
@@ -244,25 +252,20 @@ JUST RETURN THE DICTIONARY ITSELF NO EXTRA WORDS OR QOUTATIONS.
     return response.choices[0].message.content
 
 
-async def check_for_vexatious(text: list):
+async def check_for_vexatious(text: str):
     vexatious_file_path = "/Users/hannagupta/Desktop/FOI/triaging/1.2/section-14-dealing-with-vexatious-requests-0-0.pdf"
     pdf_text = read_pdf_mupdf(vexatious_file_path)
     content = f'''
-You are a Freedom of Information request responder, I will be giving you the contents of the request in form of a list and you need to process it whether that particular content can be considered vexatious or not.
-The list of content of the request is as follows:[ {text} ]
+You are a Freedom of Information request responder, I will be providing you with a Freedom of Information request enclosed in double qoutes :" {text} "
 and the document containing the vexatiuous rules and regulations is in [] , [{pdf_text}].
-You need to give it in a dictionary format with the request content as the key and response whether the request is vexatious or not as the value, and if it is vexatious then give the reason explaining why.
+You need to assess the request according to the vexatious rules given before and check if the request is vexatious then give the reason explaining why.
 When you are giving the reason for putting a request vexatious remember that the meaning of vexatious request is:
 [Vexatious requests refer to repeated and persistent demands or inquiries that are intended to annoy, harass, or cause frustration to the recipient.
 These requests often go beyond the bounds of normal and reasonable communication, becoming a form of harassment or disruption. 
 In various contexts, such as legal proceedings, administrative processes, or customer service interactions, vexatious requests can impede the normal functioning of the system and create a burdensome or hostile environment for those involved. 
 Dealing with vexatious requests may involve establishing clear boundaries, implementing procedures to address repetitive behavior, or, in extreme cases, taking legal measures to prevent ongoing harassment.]
-I want it in a dictionary format like given below for each component of the list:
-    {{
-        "Component of the list provided": "If it is not vexatious then write "Not a Vexatious request" otherwise mention that it is Vexatious and why it will be considered as a vexatious request."
-        }}
-DO NOT GIVE ANYTHING BUT THE DICTONARY.
-   
+If it is a vexatious request then return "True" otherwise return "False"
+DO NOT RETURN ANYTHING EXCEPT "True" AND "False".
 '''
     
     response =await client.chat.completions.create(
@@ -311,11 +314,11 @@ IF THERE IS NO PREVIOUS CONTEXT PROVIDED JUST MARK THAT REQUEST AS NOT REPEATED 
 
 async def check_for_completeness(request):
     print("checks")
-    vectorstore = PGVector(
-            collection_name=COLLECTION_NAME,
-            connection_string=CONNECTION_STRING,
-            embedding_function=EMBEDDINGS,
-        )
+    # vectorstore = PGVector(
+    #         collection_name=COLLECTION_NAME,
+    #         connection_string=CONNECTION_STRING,
+    #         embedding_function=EMBEDDINGS,
+    #     )
 
     docs =await vectorstore.asimilarity_search_with_score(request)
     
@@ -324,6 +327,7 @@ async def check_for_completeness(request):
       The request asking for information is = "{request}".
       The documents of text required to answer the request is given ahead = "{docs}"
       DO NOT GIVE ANYTHING OTHER THAT THE PERCENTAGE ITSELF.
+      I REPEAT ONLY PRINT THE PERCENTAGE FOR EXAMPLE "100%" or "56%".
     '''
     response=await client.chat.completions.create(
         model="gpt-4-1106",
@@ -343,15 +347,14 @@ async def get_response(request_comp, docs):
   "request": "The request component comes here",
   "response": "Here you need to form the response to the Freedom of Information request from the chunks."
   
-  "exemptions": [
-    {{
-      "section": "Section of exemption present",
-      "evidence": "The exact sentence or content that needs to be redacted from the response"
+  "exemptions":{{
+      "Section of exemption present":"Evidence: The exact sentence or content that needs to be redacted from the response",
+      "Section of exemption present":"Evidence: The exact sentence or content that needs to be redacted from the response",
     }}
-  ]
+  
 }}
-There could be multiple exemptions then put the key value pair in the list.
-If there are no exemptions, keep the list of exemptions empty. 
+There could be multiple exemptions then put the key value pairs in the dictionary.
+If there are no exemptions, keep the dictionary empty. 
 DO NOT RETURN ANYTHING BUT THE JSON OBJECT ITSELF, NO EXTRA WORDS OR QOUTATIONS
 '''
     response =await client.chat.completions.create(
@@ -403,6 +406,92 @@ async def generate_response_letter(request, responses_json):
     )
     return response.choices[0].message.content
 
+
+async def get_department(text: str):
+    content=f'''
+You have to act as an Freedom of Information request responder and redirect a request to the appropriate department.
+I will be providing you a part of the request and you need to assess which department could have the information required to answer to it according to the department list and description I will provide you.
+The description and departments are as follows:
+
+FOI Department Description 
+
+ 
+
+Adult Services - Oversees social care and support services for adults, including the elderly and those with disabilities, ensuring they have access to necessary resources and assistance. 
+
+ 
+
+Children's Services - Responsible for safeguarding and promoting the welfare of children and young people. This includes child protection, foster care, adoption services, and support for families. 
+
+ 
+
+Education Services - Manages local educational institutions, educational standards, and support services for schools. It may also cover adult education and special educational needs (SEN). 
+
+ 
+
+Environmental Services - Focuses on waste collection and disposal, recycling, street cleaning, environmental conservation, and management of public parks and green spaces. 
+
+ 
+
+Housing - Provides social housing options, addresses homelessness issues, and enforces housing standards across the council area. 
+
+ 
+
+Planning and Development - Manages land use, planning permissions for new developments, building control, and ensures that development meets local planning policy. 
+
+ 
+
+Transport and Highways - Responsible for the maintenance and improvement of local roads, footpaths, and public rights of way. This department also oversees public transportation services and parking enforcement. 
+
+ 
+
+Public Health - Works to improve the health and wellbeing of the local population, including health promotion initiatives, disease prevention, and emergency preparedness. 
+
+ 
+
+Leisure and Culture - Manages libraries, museums, sports facilities, and cultural events, promoting community engagement and access to recreational activities. 
+
+ 
+
+Finance and Resources - Manages the council's budget, financial planning, procurement, and ensures value for money in the delivery of services. 
+
+ 
+
+Human Resources - Responsible for employee relations, recruitment, training and development, and ensuring compliance with employment laws. 
+
+ 
+
+Legal Services - Provides legal advice to the council, manages legal disputes, and ensures that council actions comply with the law. 
+
+ 
+
+Regulatory Services - Encompasses licensing (e.g., alcohol and taxi licenses), food safety, trading standards, and environmental health, ensuring businesses comply with regulations. 
+
+ 
+
+Community Services - Works to engage with and support local communities, including managing community centers, supporting voluntary sector activities, and facilitating community development. 
+
+ 
+
+Information Technology - Manages the council's IT infrastructure, digital services, and cybersecurity, ensuring the efficient operation and security of digital resources. 
+
+ 
+
+Customer Services - The first point of contact for residents seeking information or services, managing inquiries through various channels (in-person, online, phone). 
+
+ The request that needs to be redirected to one of the above departments is enclosed in double qoutes: "{text}"
+
+ You only need to return the department name and nothing else.
+
+'''
+    response=await client.chat.completions.create(
+            model="gpt-4-1106",
+            messages=[{"role":"system", "content":content}]
+        )
+    return response.choices[0].message.content
+
+
+
 def extract_json_from_braces(text):
     # Find the first opening brace
     start_index = text.find('{')
@@ -425,11 +514,11 @@ def extract_json_from_braces(text):
 
 
 async def process_request_item(request_item):
-    vectorstore = PGVector(
-        collection_name=COLLECTION_NAME,
-        connection_string=CONNECTION_STRING,
-        embedding_function=EMBEDDINGS,
-    )
+    # vectorstore = PGVector(
+    #     collection_name=COLLECTION_NAME,
+    #     connection_string=CONNECTION_STRING,
+    #     embedding_function=EMBEDDINGS,
+    # )
     docs =await vectorstore.asimilarity_search_with_score(request_item)
     print("*************")
     print(docs)
@@ -484,19 +573,40 @@ def login_page():
 async def index():
     if 'user' in session:
         if request.method == "POST":
+            # if session.get('foi_req'):
+            #     session.pop('foi_req', None)
+            # if session.get('email_id'):
+            #     session.pop('email_id')
+            # if session.get('timestamp'):
+            #     session.pop('timestamp')
+            # if session.get("request_list"):
+            #     session.pop("request_list")
+            # if session.get("valid_dict"):
+            #     session.pop("valid_dict")
+            # if session.get("vexatious_dict"):
+            #     session.pop("vexatious_dict")
+            # if session.get("repeated_dict"):
+            #     session.pop("repeated_dict")
+            # if session.get("department_list"):
+            #     session.pop("department_list")
+            # if session.get("response_dict"):
+            #     session.pop("response_dict")
+
             input_text = request.form.get("input_text")
             email_id = request.form.get("email_id")
             timestamp = request.form.get("timestamp")
+            print("lets goooo")
             print(input_text)
             print(email_id)
             session['foi_req']=input_text
             session['email_id']=email_id
             session['timestamp']=timestamp
             full_name=await check_full_name(input_text)
-            
-            # Do whatever you want with these values
-            
-            return redirect(url_for('identify_parts'))
+
+            print(full_name)
+            print(type(full_name))
+            vexatious= await check_for_vexatious(input_text)
+            return jsonify({'full_name': full_name})
         else:
             return render_template('index.html')
     else:
@@ -507,6 +617,47 @@ async def index():
         </script>
         '''
     
+
+
+@application.route("/full_name", methods=["GET","POST"])
+async def full_name():
+     if 'user' in session:
+        if request.method == "POST":
+            input_text = request.form.get("input_text")
+            email_id = request.form.get("email_id")
+            timestamp = request.form.get("timestamp")
+            full_name=await check_full_name(input_text)
+            return jsonify({'full_name': full_name})
+        else:
+            return render_template('index.html')
+     else:
+        return '''
+        <script>
+            alert('Sorry but you need to login to work with FOI');
+            window.location = '/login';  
+        </script>
+        '''
+
+@application.route("/vex", methods=["GET","POST"])
+async def vex():
+     if 'user' in session:
+        if request.method == "POST":
+            input_text = request.form.get("input_text")
+            email_id = request.form.get("email_id")
+            timestamp = request.form.get("timestamp")
+            vexatious= await check_for_vexatious(input_text)
+            return jsonify({'vex': vexatious})
+        else:
+            return render_template('index.html')
+     else:
+        return '''
+        <script>
+            alert('Sorry but you need to login to work with FOI');
+            window.location = '/login';  
+        </script>
+        '''
+
+
 @application.route("/identify_parts", methods=["GET","POST"])
 async def identify_parts():
      result_list=None
@@ -549,41 +700,41 @@ async def validation():
         </script>
         '''
     
-@application.route("/vexatious", methods=["GET","POST"])
-async def vexatious():
-    if 'user' in session:
-        if request.method =="POST":
-            # valid_dict=request.form.get('validation_dict_json')
-            valid_dict=session.get("valid_dict")
-            print(valid_dict)
-            print(type(valid_dict))
-            # valid_dict=ast.literal_eval(valid_dict)
-            valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
-            session["valid_flag"]=valid_flag
-            request_list=session.get("request_list")
-            print(request_list)
+# @application.route("/vexatious", methods=["GET","POST"])
+# async def vexatious():
+#     if 'user' in session:
+#         if request.method =="POST":
+#             # valid_dict=request.form.get('validation_dict_json')
+#             valid_dict=session.get("valid_dict")
+#             print(valid_dict)
+#             print(type(valid_dict))
+#             # valid_dict=ast.literal_eval(valid_dict)
+#             valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
+#             session["valid_flag"]=valid_flag
+#             request_list=session.get("request_list")
+#             print(request_list)
 
-            gpt_vexatious_dict =await check_for_vexatious(session.get("request_list"))
-            vexatious_dict=parse_terminal_dict(gpt_vexatious_dict)
-            vexatious_dict=ast.literal_eval(vexatious_dict)
-            session["vexatious_dict"]=vexatious_dict
-            vexatious_flag={key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
-            vex = any(value == 0 for value in vexatious_flag.values())
-            refusal = None
-            if vex:
-                foi_request=session.get("foi_req")
-                reason="it is a vexaious request"
-                refusal=await refusal_notice(reason, foi_request)
-            return render_template("vexatious.html", vexatious_dict=vexatious_dict, valid_flag=valid_flag)
-        else:
-            return render_template("vexatious.html", vexatious_dict=vexatious_dict, valid_flag=valid_flag)
-    else:
-         return '''
-        <script>
-            alert('Sorry but you need to login to work with FOI');
-            window.location = '/login';  
-        </script>
-        '''
+#             gpt_vexatious_dict =await check_for_vexatious(session.get("request_list"))
+#             vexatious_dict=parse_terminal_dict(gpt_vexatious_dict)
+#             vexatious_dict=ast.literal_eval(vexatious_dict)
+#             session["vexatious_dict"]=vexatious_dict
+#             vexatious_flag={key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
+#             vex = any(value == 0 for value in vexatious_flag.values())
+#             refusal = None
+#             if vex:
+#                 foi_request=session.get("foi_req")
+#                 reason="it is a vexaious request"
+#                 refusal=await refusal_notice(reason, foi_request)
+#             return render_template("vexatious.html", vexatious_dict=vexatious_dict, valid_flag=valid_flag)
+#         else:
+#             return render_template("vexatious.html", vexatious_dict=vexatious_dict, valid_flag=valid_flag)
+#     else:
+#          return '''
+#         <script>
+#             alert('Sorry but you need to login to work with FOI');
+#             window.location = '/login';  
+#         </script>
+#         '''
 
 
 @application.route("/check_repeated", methods=["GET","POST"])
@@ -594,17 +745,15 @@ async def check_repeated():
             email = session.get("email_id")
             
             latest_timestamp = session.get("timestamp")
-            # vexatious_dict=request.form.get('vexatious_dict_json')
-            vexatious_dict = session.get("vexatious_dict")
+            # vexatious_dict=request.form.get('vexatious_dict_vexatious_dict = session.get("vexatious_dict")
 
             valid_dict=session.get("valid_dict")
             valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
             print(valid_flag)
             print(type(valid_flag))
             print("in repeated ")
-            print(vexatious_dict)
-            print(type(vexatious_dict))
-            vexatious_flags={key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
+           
+    
             previous_requests = get_requests_by_email(email, latest_timestamp)
             gpt_repeated_dict = await check_for_repeated(previous_requests, session.get("request_list"))
             repeated_dict=parse_terminal_dict(gpt_repeated_dict)
@@ -613,9 +762,9 @@ async def check_repeated():
 
             session["repeated_dict"] = repeated_dict
 
-            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag, vexatious_flags=vexatious_flags)
+            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag)
         else:
-            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag, vexatious_flags=vexatious_flags)
+            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag)
     else:
          return '''
         <script>
@@ -627,12 +776,52 @@ async def check_repeated():
 async def check_completeness():
     if 'user' in session:
         if request.method =="POST":
+            department_list=[]
             request_list=session.get("request_list")
             request_list=ast.literal_eval(request_list)
             complete_dict = await process_requests(request_list)
-            return render_template("completeness.html", complete_dict=complete_dict)
+            for key, value in complete_dict.items():
+    # Check if the value is a string and contains '%' sign
+                if isinstance(value, str) and '%' in value:
+                    # Remove '%' sign and convert the value to float
+                    percentage_value = float(value.replace('%', ''))
+                    # Check if the percentage is less than 100
+                    if percentage_value < 100:
+                        department =await get_department(key)
+                        department_list.append(department)
+
+                    else:
+                        department_list.append("-")
+                else:
+                    print(f"The value for key '{key}' is not in string format or doesn't contain '%' sign.")
+            
+
+            services = [
+                "Adult Services",
+                "Children's Services",
+                "Education Services",
+                "Environmental Services",
+                "Housing",
+                "Planning and Development",
+                "Transport and Highways",
+                "Public Health",
+                "Leisure and Culture",
+                "Finance and Resources",
+                "Human Resources",
+                "Legal Services",
+                "Regulatory Services",
+                "Community Services",
+                "Information Technology",
+                "Customer Services"
+            ]
+            print(complete_dict)
+            print("^^^^^^^^^^^^^^^")
+            print(department_list)
+            session["complete_dict"]=complete_dict
+            session["department_list"]=department_list
+            return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
         else:
-            return render_template("completeness.html", complete_dict=complete_dict)
+            return render_template("completeness.html", complete_dict=session.get("complete_dict"), department_list=session.get("department_list"))
     else:
          return '''
         <script>
@@ -645,6 +834,8 @@ async def check_completeness():
 async def retrieval():
     if 'user' in session:
         if request.method =="POST":
+            selected_values = request.form.getlist('cost_limit')
+            print(selected_values)  
             print("retrieval endpoint")
             request_list = session.get("request_list")
             request_list=ast.literal_eval(request_list)
@@ -655,19 +846,44 @@ async def retrieval():
             for request_item in request_list:
                 tasks.append(process_request_item(request_item))
             responses = await asyncio.gather(*tasks)
+            print("checks before printing the whole thing ")
             print(responses)
-            for response in responses:
-                    exemptions = response.get("exemptions", [])
-                    for exemption in exemptions:
-                        exemption["exemptions_length"] = len(exemptions)
+
+            # for response in responses:
+            #         exemptions = response.get("exemptions", [])
+            #         for exemption in exemptions:
+            #             exemption["exemptions_length"] = len(exemptions)
             response_dict = responses
             session["response_dict"]=response_dict
             print("duduudud")
             print(response_dict)
             print(type(response_dict))
-            return render_template("retrieval.html", responses=responses)
+            responses_json = json.dumps(response_dict)
+            redactions=["Section 21: Information accessible by other means",
+                        "Section 22: Information intended for future publication",
+                        "Section 23: Security bodies",
+                        "Section 24: National Security",
+                        "Section 26: Defence",
+                        "Section 27: International Relations",
+                        "Section 28: Realtions within the UK",
+                        "Section 29: The Economy",
+                        "Section 30 & 31: Law enforcement",
+                        "Section 32: Court Records",
+                        "Section 33: Public Audits",
+                        "Section 34: Parliamentary Privilege",
+                        "Section 35: Govenment Policy",
+                        "Section 36 - Prejudice to the effective conduct of public affairs",
+                        "Section 37 - Commumincation with His Majesty",
+                        "Section 38 - Health and Safety",
+                        "Section 39 - Environmental Information",
+                        "Section 40 - Personal Information",
+                        "Section 41 - Confidentiality",
+                        "Section 42 - Legal Professional Privilege",
+                        "Section 43 - Trade Secrets and Prejudice to commercial interests",
+                        "Section 44 - Prohibitions on Disclosure"]
+            return render_template("retrieval.html", responses=response_dict, redactions=redactions, responses_json=responses_json)
         else:
-            return render_template("retrieval.html", responses=responses)
+            return render_template("retrieval.html", responses_dict=session.get("response_dict"))
     else:
          return '''
         <script>
@@ -678,6 +894,7 @@ async def retrieval():
 
 @application.route("/response", methods=["GET","POST"])
 async def generate_response():
+
     if 'user' in session:
         if request.method =="POST":
             responses=request.form.get("responses")

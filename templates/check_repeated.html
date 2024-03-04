@@ -21,24 +21,40 @@
         } 
 
         .header {
-            background-color: #0066cc;
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
 
-        .header img {
-            height: 50px; /* Adjust height as needed */
-            margin-right: 20px; /* Add some spacing between logos */
-        }
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
 
         .wrapper {
             padding: calc(100px + 40px) 20px 20px;
@@ -158,8 +174,11 @@
 </head>
 <body>
     <header class="header">
-        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
-        <div><img src="static/image.png" alt="NHS Logo"/></div>
+        <div class="developer-details">
+            <img src="static/Logo-Primary.png" width="100px" />
+          </div>
+          <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
+        <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
         <button class="logout-btn">Logout</button>
     </header>
     <div class="wrapper">
@@ -172,7 +191,6 @@
                     <tr>
                         <th>Component</th>
                         <th>Validation Result</th>
-                        <th>Vexatious Result</th>
                         <th>Repeated Result</th>
                     </tr>
                 </thead>
@@ -181,14 +199,13 @@
                         <tr>
                             <td>{{ component }}</td>
                             <td style="text-align: center;">{% if valid_flag[component] == 1 %} &#10004; {% else %} &#10008; {% endif %}</td>
-                            <td style="text-align: center;">{% if vexatious_flags[component] == 0 %} &#10008; {% else %} &#10004; {% endif %}</td>
                             <td style="text-align: center;">{{ result }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
             <div class="btn-wrapper">
-                <form action="/vexatious" method="get">
+                <form action="/validation" method="get">
                     <button type="submit" class="button">Previous</button>
                 </form>
                 <form action="/completeness_check" method="post">

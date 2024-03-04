@@ -23,23 +23,40 @@
         }
 
         .header {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
 
-        .header img {
-            height: 70px;
-        }
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
 
         .wrapper {
             padding: calc(100px + 40px) 20px 20px;
@@ -178,20 +195,238 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
+      body {
+        font-family: "Inter", sans-serif;
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal {
+        width: 600px;
+        background-color: white;
+        border-radius: 6px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.5s;
+      }
+
+      .status-container {
+        display: flex;
+        justify-content: space-evenly;
+        gap: 3rem;
+        font-size: 14px;
+        position: relative;
+      }
+
+      .status-container .progress_bar {
+        position: absolute;
+        overflow-x: hidden;
+        height: 10px;
+        width: 75%;
+        display: flex;
+        align-items: center;
+        left: 52%;
+        top: 26px;
+        transform: translate(-50%, -50%);
+        z-index: 0;
+      }
+      .status-container .progress_bar .hollow_line {
+        height: 3px;
+        width: 100%;
+        background-color: #e7eaf0;
+      }
+      .status-container .progress_bar .filled_line {
+        height: 3px;
+        width: 100%;
+        background-color: rgb(22 163 74);
+        box-shadow: 0px 0px 5px rgb(22 163 74);
+        position: absolute;
+        top: 5px;
+        right: 100%;
+        transform: translateY(-50%);
+        transition: transform 1.2s ease-in-out;
+      }
+      .status-container .progress_bar [data-step="1"] {
+        transform: translateX(50%);
+      }
+      .status-container .progress_bar [data-step="2"] {
+        transform: translateX(100%);
+      }
+
+      .status-container .status {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+        z-index: 1;
+        width: 120px;
+      }
+
+      .img-container {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        background-color: rgb(209 213 219);
+        border-radius: 50%;
+        place-content: center;
+        transition: all 0.7s;
+      }
+
+      .status-container p {
+        text-align: center;
+      }
+
+      .inner-container {
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      .inner-container .confirm-container {
+        margin: 1rem;
+        padding: 1rem;
+        font-size: 14px;
+        box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+          rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+      }
+
+      .inner-container[data-] .btn-container {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .btn-container button {
+        border: 1px solid transparent;
+        background-color: #f29a2e;
+        color: white;
+        cursor: pointer;
+        transition: all 0.4s;
+        padding: 8px 12px;
+        border-radius: 6px;
+
+        &:hover {
+          border: 1px solid #f29a2e;
+          background-color: white;
+          color: #f29a2e;
+        }
+      }
+
+      .cont-btns{
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding: 1rem;
+      }
+
+       .cont-btns button{
+            padding: 6px 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+       }
+
+       .approve{
+        background-color: rgb(187 247 208);
+        color: rgb(5 46 22);
+       }
+
+       .reject{
+        background-color: rgb(252 165 165);
+        color: rgb(69 10 10);
+       }
 
     </style>
     <title>FOI</title>
 </head>
 <body>
+    <!-- <header class="header">
+        <div class="developer-details">
+          <img src="/Logo-Primary.png" width="100px" />
+        </div>
+        <div><img src="/nhs-logo.png" width="100px" /></div>
+      </header> -->
 <header class="header">
-    <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
-    <div><img src="static/image.png" alt="NHS Logo"/></div>
+    <div class="developer-details">
+        <img src="static/Logo-Primary.png" width="100px" />
+      </div>
+      <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
+    <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
     <button class="logout-btn">Logout</button>
 </header>
 <div class="wrapper">
+    <div class="overlay" id="overlay" style="display: none;">
+        <div class="modal">
+          <div class="status-container">
+            <div class="progress_bar">
+              <div class="hollow_line"></div>
+              <div class="filled_line" id="filled-line"></div>
+            </div>
+            <div class="status" id="fullname-cont">
+              <div class="img-container">
+                <img src="static/pending.svg" width="24" />
+              </div>
+              <p style="font-weight: 500">Processing Fullname request</p>
+            </div>
+            <div class="status" id="vexatious-cont">
+              <div class="img-container">
+                <img src="static/pending.svg" width="24" />
+              </div>
+              <p>Vexatious request</p>
+            </div>
+            <div class="status" id="processing-cont">
+              <div class="img-container">
+                <img src="static/pending.svg" width="24" />
+              </div>
+              <p>Processing</p>
+            </div>
+          </div>
+          <div class="inner-container">
+            <div
+              class="confirm-container"
+              id="confirm-container"
+              style="display: none"
+            >
+              This request doesn't contains full name. Do you still want to
+              process?
+              <div class="cont-btns">
+                <button class="reject" id="cancel">Cancel</button>
+                <button class="approve" id="yes">Yes</button>
+              </div>
+            </div>
+            <div
+              class="confirm-container"
+              id="confirm-container-2"
+              style="display: none"
+            >
+              This request is vexatious. Do you still want to
+              process?
+              <div class="cont-btns">
+                <button class="reject" id="cancel">Cancel</button>
+                <button class="approve" id="yes">Yes</button>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="btn-container"><button id="next-btn">Next</button></div> -->
+        </div>
+      </div>
     <div class="container">
-        <form method="post" action="/index">
+        <form id="form" method="post" action="/index">
             <div class="input-container">
                 <label for="input_text">Please enter the request:</label>
                 <textarea name="input_text" id="input_text" placeholder="Enter text here"></textarea>
@@ -217,31 +452,237 @@
 <div id="loadingOverlay" class="loading-overlay">
     <div class="spinner"></div>
     <div class="loading-text">Processing your request...</div>
+    <div id="messageContainer" style="display: none;"></div>
 </div>
+
 <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
-</body>
 <script>
-    document.querySelector('.logout-btn').addEventListener('click', function() {
-        window.location.href = "/logout"; // Redirect to the /logout route
-    });
-    const form = document.querySelector('form');
+    // const nextBtn = document.getElementById("next-btn");
+    const overlay = document.getElementById("overlay");
+    // const form = document.getElementById("form");
 
-    form.addEventListener('submit', function(event) {
-        // Prevent default form submission
-        event.preventDefault();
-        
-        // Show loading spinner on form submission
-        showLoading();
-        
-        // Submit the form after a delay (for demonstration purposes)
-        setTimeout(() => {
-            form.submit();
-        }, 2000); // Change the delay as needed
-    });
+  const filledLine = document.getElementById("filled-line");
+  const fullnameContainer = document.getElementById("fullname-cont");
+  const vexatiousContainer = document.getElementById("vexatious-cont");
+  const processingContainer = document.getElementById("processing-cont");
+  const currentStatus = document.getElementById("current-status");
+  const confirmContainer = document.getElementById("confirm-container");
+  const confirmContainer2 = document.getElementById("confirm-container-2");
 
-    function showLoading() {
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        loadingOverlay.style.display = 'flex';
+  const approve = confirmContainer.querySelector("#yes");
+  const reject = confirmContainer.querySelector("#cancel");
+  const approve2 = confirmContainer2.querySelector("#yes");
+  const reject2 = confirmContainer2.querySelector("#cancel");
+
+
+  let currentStep = 0;
+
+  const completeStep = (fullnameContainer) => {
+    const statusContainer =
+      fullnameContainer.querySelector(".img-container");
+    const statusImg = statusContainer.querySelector("img");
+    const statuxText = fullnameContainer.querySelector("p");
+    statusImg.src = "static/complete.svg";
+    statusContainer.style.backgroundColor = "rgb(22 163 74)";
+    statuxText.textContent = "Completed";
+  };
+
+//   nextBtn.addEventListener("click", () => {
+//     if (currentStep === 0) {
+//       completeStep(fullnameContainer);
+//       const statusText = vexatiousContainer.querySelector("p");
+//       statusText.textContent = "Processing Vexatious request";
+//       statusText.style.fontWeight = "500";
+//       confirmContainer.style.display = "block";
+//       //   currentStatus.textContent = "Processing Vexatious request";
+//       currentStep += 1;
+//       filledLine.setAttribute("data-step", currentStep);
+//     } else if (currentStep === 1) {
+//       completeStep(vexatiousContainer);
+//       currentStep += 1;
+//       const statusText = processingContainer.querySelector("p");
+//       statusText.style.fontWeight = "500";
+//       statusText.textContent = "Processing your request";
+//       filledLine.setAttribute("data-step", currentStep);
+//     } else {
+//       completeStep(processingContainer);
+//       filledLine.setAttribute("data-step", currentStep);
+//     }
+//   });
+
+
+document.querySelector('.logout-btn').addEventListener('click', function() {
+    window.location.href = "/logout"; // Redirect to the /logout route
+});
+
+const form = document.querySelector('form');
+form.addEventListener('submit', async function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    // Serialize form data
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('/index', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            // Handle successful response
+            console.log('Form data submitted successfully');
+        } else {
+            // Handle error response
+            console.error('Failed to submit form data');
+        }
+    } catch (error) {
+        console.error('Error:', error);
     }
+});
+form.addEventListener('submit', async function(event) {
+// Prevent default form submission
+event.preventDefault();
+
+const callStepTwo = async () => {
+    completeStep(fullnameContainer);
+      const statusText1 = vexatiousContainer.querySelector("p");
+      statusText1.textContent = "Checking for Vexatious request";
+      statusText1.style.fontWeight = "500";
+      //   currentStatus.textContent = "Processing Vexatious request";
+      currentStep += 1;
+      filledLine.setAttribute("data-step", currentStep);
+
+const res2 = await  fetch('/vex', {
+    method: 'POST',
+    body: new FormData(form),
+})
+
+const data2 = await res2.json()
+
+if(data2.vex === 'True'){
+    confirmContainer2.style.display = 'block'
+}
+else{
+    confirmContainer2.style.display = "none"
+    completeStep(vexatiousContainer);
+      const statusText1 = processingContainer.querySelector("p");
+      statusText1.textContent = "Processing your request";
+      statusText1.style.fontWeight = "500";
+      //   currentStatus.textContent = "Processing Vexatious request";
+      currentStep += 1;
+      filledLine.setAttribute("data-step", currentStep);
+      window.location.href = "{{ url_for('identify_parts') }}";
+}
+
+
+reject2.addEventListener('click', function(){
+    confirmContainer2.style.display = "none"
+    overlay.style.display = 'none'
+})
+
+
+approve2.addEventListener('click', async function(){
+    confirmContainer2.style.display = "none"
+    completeStep(vexatiousContainer);
+      const statusText1 = processingContainer.querySelector("p");
+      statusText1.textContent = "Processing your request";
+      statusText1.style.fontWeight = "500";
+      //   currentStatus.textContent = "Processing Vexatious request";
+      currentStep += 1;
+      filledLine.setAttribute("data-step", currentStep);
+      window.location.href = "{{ url_for('identify_parts') }}";
+    // const data3 = await res.json();
+
+})
+
+
+
+
+
+//    completeStep(vexatiousContainer);
+//           currentStep += 1;
+//           const statusText = processingContainer.querySelector("p");
+//           statusText.style.fontWeight = "500";
+//           statusText.textContent = "Processing your request";
+//           filledLine.setAttribute("data-step", currentStep);
+
+//         if (data.full_name === "False") {
+//             // Ask the user if they want to proceed
+//             if (confirm("The given request does not contain the full name of the requestor. Do you still want to proceed?")) {
+//                 // Display message under loader
+//                 showMessage("Processing your request...", true);
+//             } else {
+//                 // Hide loading spinner and return if user chooses not to proceed
+//                 hideLoading();
+//                 return;
+//             }
+//         } else {
+//             // Display success message under loader
+//             showMessage("Full name present", false);
+//         }
+//         // Redirect to the identify_parts route after a delay
+//         setTimeout(() => {
+//             window.location.href = "/identify_parts";
+//         }, 2000); // Change the delay as needed
+
+// .catch(error => {
+//     console.error('Error:', error);
+//     // Handle errors if any
+// });
+ 
+}
+
+// Show loading spinner on form submission
+// showLoading();
+overlay.style.display = 'flex'
+
+// Submit the form data asynchronously using fetch
+const res = await fetch('/full_name', {
+    method: 'POST',
+    body: new FormData(form),
+})
+
+const data = await res.json();
+
+console.log(data);
+
+if(data.full_name === 'False'){
+    confirmContainer.style.display = "block"
+}else{
+    callStepTwo()
+}
+
+reject.addEventListener('click', function(){
+    confirmContainer.style.display = "none"
+    overlay.style.display = 'none'
+})
+
+approve.addEventListener('click', async function(){
+    confirmContainer.style.display = "none"
+    callStepTwo()
+});
+})
+
+function showMessage(message, isWarning) {
+const messageContainer = document.getElementById('messageContainer');
+messageContainer.innerHTML = message;
+messageContainer.style.display = 'block';
+if (isWarning) {
+    messageContainer.style.color = 'red';
+} else {
+    messageContainer.style.color = 'green';
+}
+}
+
+function hideLoading() {
+const loadingOverlay = document.getElementById('loadingOverlay');
+loadingOverlay.style.display = 'none';
+}
+function showLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = 'flex';
+}
+
 </script>
+</body>
 </html>
