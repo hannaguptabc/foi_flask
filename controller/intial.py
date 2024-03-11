@@ -6,27 +6,31 @@ from typing import Optional
 import psycopg2
 # from passlib.context import CryptContext
 import datetime
-from openai import AsyncAzureOpenAI
+from openai import AzureOpenAI
 import os
+import uuid
+
 from dotenv import load_dotenv
 import bcrypt
 import asyncio
 import ast
 import fitz
 import json
+from flask import g
 from flask import jsonify
 from langchain_community.vectorstores.pgvector import PGVector
 from langchain_openai.embeddings import AzureOpenAIEmbeddings
+
 application.secret_key='32qwe34ds'
 
 
 load_dotenv('myenv/.env')
 
-application.config['SESSION_TPYE']='filesystem'
-application.config['SESSION_PERMENANT']=False
-application.config['PERMENANT_SESSION_LIFETIME']=datetime.timedelta(minutes=5)
-application.config['SESSION_USE_SIGNER']=True
-client=AsyncAzureOpenAI(api_key = os.getenv("openai_api_key"),
+application.config['SESSION_TYPE'] = 'filesystem'
+application.config['SESSION_PERMANENT'] = False
+application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=120)
+application.config['SESSION_USE_SIGNER'] = True
+client=AzureOpenAI(api_key = os.getenv("openai_api_key"),
                    api_version="2023-09-01-preview",
                    azure_endpoint=os.getenv("openai_api_base"))
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -55,6 +59,8 @@ vectorstore = PGVector(
         connection_string=CONNECTION_STRING,
         embedding_function=EMBEDDINGS,
     )
+
+
 
 class User:
     def __init__(self, id: int, username: str, hashed_password: str, created_at: datetime):
@@ -155,11 +161,11 @@ def get_requests_by_email(email_id: str, latest_timestamp: str):
         # Query all requests for a particular email ID
         query = f'''
             SELECT *
-            FROM request
+            FROM requests
             WHERE email_id = %s
             AND timestamp < %s;
         '''
-        cursor.execute(query)
+        cursor.execute(query, (email_id, latest_timestamp))
 
         # Fetch all the rows
         rows = cursor.fetchall()
@@ -177,6 +183,36 @@ def get_requests_by_email(email_id: str, latest_timestamp: str):
         # Handle the error as needed
         return None
 
+
+def insert_request(request_text: str, timestamp: str, email_id: str):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Generate a UUID for the request_id
+        request_id = str(uuid.uuid4())
+
+        # Insert a new request into the 'request' table
+        query = '''
+            INSERT INTO request (request_id, request_text, timestamp, email_id)
+            VALUES (%s, %s, %s, %s);
+        '''
+        cursor.execute(query, (request_id, request_text, timestamp, email_id))
+
+        # Commit the transaction
+        conn.commit()
+
+        # Close the connection
+        conn.close()
+        print("Request inserted successfully")
+
+    except Exception as e:
+        print(f"Error: {e}")
+        # Rollback the transaction if an error occurs
+        conn.rollback()
+
+
+
 async def check_full_name(text: str):
     content = f'''Act as an Freedom of Information responder, and check if the the request given to you, contains the full name of the requester.
     You just need to return True or False.
@@ -186,7 +222,7 @@ async def check_full_name(text: str):
     For example if the request contains "Tom Cruise" then return True, if the text contains "Mr. Cruise" then also return True but if it contains "Tom" then return False.
     The request you need to check for the name is given ahead enclosed in double qoutes="{text}"
 '''
-    response =await client.chat.completions.create(
+    response =client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
@@ -220,7 +256,7 @@ async def identify_part(text: str):
     '''
     
 
-    response =await client.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
@@ -245,30 +281,34 @@ async def validation_of_request(contents: list):
 Remember to only verify if the information asked in request is valid or not, the vexatious request would be checked later so leave them.
 JUST RETURN THE DICTIONARY ITSELF NO EXTRA WORDS OR QOUTATIONS.
 '''
-    response =await client.chat.completions.create(
+    response =client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
     return response.choices[0].message.content
 
 
-async def check_for_vexatious(text: str):
+async def check_for_vexatious(text: list):
     vexatious_file_path = "/Users/hannagupta/Desktop/FOI/triaging/1.2/section-14-dealing-with-vexatious-requests-0-0.pdf"
     pdf_text = read_pdf_mupdf(vexatious_file_path)
     content = f'''
-You are a Freedom of Information request responder, I will be providing you with a Freedom of Information request enclosed in double qoutes :" {text} "
+YYou are a Freedom of Information request responder, I will be giving you the contents of the request in form of a list and you need to process it whether that particular content can be considered vexatious or not.
+The list of content of the request is as follows:[ {text} ]
 and the document containing the vexatiuous rules and regulations is in [] , [{pdf_text}].
-You need to assess the request according to the vexatious rules given before and check if the request is vexatious then give the reason explaining why.
+You need to give it in a dictionary format with the request content as the key and response whether the request is vexatious or not as the value, and if it is vexatious then give the reason explaining why.
 When you are giving the reason for putting a request vexatious remember that the meaning of vexatious request is:
 [Vexatious requests refer to repeated and persistent demands or inquiries that are intended to annoy, harass, or cause frustration to the recipient.
 These requests often go beyond the bounds of normal and reasonable communication, becoming a form of harassment or disruption. 
 In various contexts, such as legal proceedings, administrative processes, or customer service interactions, vexatious requests can impede the normal functioning of the system and create a burdensome or hostile environment for those involved. 
 Dealing with vexatious requests may involve establishing clear boundaries, implementing procedures to address repetitive behavior, or, in extreme cases, taking legal measures to prevent ongoing harassment.]
-If it is a vexatious request then return "True" otherwise return "False"
-DO NOT RETURN ANYTHING EXCEPT "True" AND "False".
+I want it in a dictionary format like given below for each component of the list:
+    {{
+        "Component of the list provided": "If it is not vexatious then write "Not a Vexatious request" otherwise mention that it is Vexatious and why it will be considered as a vexatious request."
+        }}
+DO NOT GIVE ANYTHING BUT THE DICTONARY.
 '''
     
-    response =await client.chat.completions.create(
+    response =client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
@@ -282,7 +322,7 @@ async def refusal_notice(reason, request):
     You need to act like a FOI request responder and generate a refusal notice according to these regulation {pdf_text} after the request been rejected for the folloing reason "{reason}". The request is in [], [{request}]. So state the reason why it is {type} of request.
 
     '''
-    response =await client.chat.completions.create(
+    response =client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
@@ -306,7 +346,7 @@ async def check_for_repeated(previous_requests, request_list):
 IF THERE IS NO PREVIOUS CONTEXT PROVIDED JUST MARK THAT REQUEST AS NOT REPEATED REQUEST BUT DO NOT GIVE ANYTHING BUT THE DICTONARY.
 
     '''
-    response =await client.chat.completions.create(
+    response =client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
@@ -329,7 +369,7 @@ async def check_for_completeness(request):
       DO NOT GIVE ANYTHING OTHER THAT THE PERCENTAGE ITSELF.
       I REPEAT ONLY PRINT THE PERCENTAGE FOR EXAMPLE "100%" or "56%".
     '''
-    response=await client.chat.completions.create(
+    response=client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
@@ -338,7 +378,7 @@ async def check_for_completeness(request):
 
 async def get_response(request_comp, docs):
     content=f'''Do not return anything except the json object. You need to act as an Freedom of Information responder. I will be providing you with the request component, and a dictionary of the most similar chunks of content found in the database along with some medatadata about any exemptions that can be applied on the data. The given dictionary will be in the form of {{"chunk of data":"exemption:exemption applied of the data"}}
-                     Now you need to give back a json output, with the request along with its response and then if there are any exemptions present in the metadata then you need to give the name of the section of exemption  and also the redaction part that need to be removed from the response under that exemption.
+                     Now you need to give back a json output, with the request along with its response(the framed response should not contain any of the redactions line that are present in the ) and then if there are any exemptions present in the metadata then you need to give the name of the section of exemption  and also the redaction part that need to be removed from the response under that exemption.
                      Do not return anything but the json itself.
                      The request component is given ahead:'{request_comp}'.
                      the dictionary of similar chunk and exemptions present: '{docs}'. Now you need to go through this dictionary carefully while writing the response, in the dictionary the specific part is mentioned where the exemption is actually present, so now I want you to use your intelligence to scan through the response and see if that exemption related content is present in the response, if it is then only include the exemption otherwise don't. There might be some cases that from the dictionary provided before the chunk has some exemptions attached to it, but when you go through the response , the response does not contain that particular data.
@@ -357,7 +397,7 @@ There could be multiple exemptions then put the key value pairs in the dictionar
 If there are no exemptions, keep the dictionary empty. 
 DO NOT RETURN ANYTHING BUT THE JSON OBJECT ITSELF, NO EXTRA WORDS OR QOUTATIONS
 '''
-    response =await client.chat.completions.create(
+    response =client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
@@ -377,7 +417,7 @@ Now you need to frame the letter in such a way that you mention all the parts an
 
 '''
 
-    response=await client.chat.completions.create(
+    response= client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role":"system", "content":content}]
     )
@@ -390,9 +430,7 @@ async def generate_response_letter(request, responses_json):
 
 
     content=f'''You have to act as an Freedom of Information request responder and generate a response letter to a request based on a template and also assess if there are any exemptions present.
-    I will be giving you three things: the original FOI request, response template, and a list of json object which contains the component of request asking some information, the generated response for it , and along with it, it has a section called exemptions,
-    which is basically depicts the exemption detected from the chunks of data that the request response has been fetched from. Now what you need to do is check the evidence part of the exemptions, and go through the response, if any of the evidence information is present 
-    inside the evidence tag then you do not need to answer that particular request's response in the letter, and instead Mention the exemption that is present in the data that might be released and give a brief discussion about how that exemption is involved.
+    I will be giving you three things: the original FOI request, response template, and a list of json object which contains the component of request asking some information, the generated response for it. 
     The original FOI request is as follows: ({request}).
     The response template is as follows: ({response_template})
     The list of json object is as follows: ({responses_json}).
@@ -400,7 +438,7 @@ async def generate_response_letter(request, responses_json):
 
 '''
     
-    response=await client.chat.completions.create(
+    response=client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role":"system", "content":content}]
     )
@@ -484,7 +522,7 @@ Customer Services - The first point of contact for residents seeking information
  You only need to return the department name and nothing else.
 
 '''
-    response=await client.chat.completions.create(
+    response=client.chat.completions.create(
             model="gpt-4-1106",
             messages=[{"role":"system", "content":content}]
         )
@@ -553,19 +591,13 @@ def login_page():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        print(username)
-        print(password)
         user = get_user_by_username(username)
-
-        
-        # print(user.hashed_password[0])
-        print(password)
         if user is None or not verify_password(password, user.hashed_password):
+        
             return 'hello' # Redirect to dashboard page after successful login
         else:
             session["user"]=username
             return redirect(url_for("index"))
-            # return 'hi'
     return render_template("login.html")
     
 
@@ -573,39 +605,35 @@ def login_page():
 async def index():
     if 'user' in session:
         if request.method == "POST":
-            # if session.get('foi_req'):
-            #     session.pop('foi_req', None)
-            # if session.get('email_id'):
-            #     session.pop('email_id')
-            # if session.get('timestamp'):
-            #     session.pop('timestamp')
-            # if session.get("request_list"):
-            #     session.pop("request_list")
-            # if session.get("valid_dict"):
-            #     session.pop("valid_dict")
-            # if session.get("vexatious_dict"):
-            #     session.pop("vexatious_dict")
-            # if session.get("repeated_dict"):
-            #     session.pop("repeated_dict")
-            # if session.get("department_list"):
-            #     session.pop("department_list")
-            # if session.get("response_dict"):
-            #     session.pop("response_dict")
+            if session.get("foi_request"):
+                session.pop("foi_request")
+            if session.get("email_id"):
+                session.pop("email_id")
+            if session.get("request_list"):
+                session.pop("request_list")
+            if session.get("valid_dict"):
+                session.pop("valid_dict")
+            if session.get("vexatious_flag"):
+                session.pop("vexatious_flag")
+            if session.get("repeated_dict"):
+                session.pop("repeated_dict")
+
 
             input_text = request.form.get("input_text")
+            
             email_id = request.form.get("email_id")
             timestamp = request.form.get("timestamp")
             print("lets goooo")
             print(input_text)
             print(email_id)
-            session['foi_req']=input_text
-            session['email_id']=email_id
-            session['timestamp']=timestamp
+            
             full_name=await check_full_name(input_text)
-
+            print("fuction")
+            session["foi_request"]=input_text
+            session["email_id"]=email_id
+            session["timestamp"]=timestamp
             print(full_name)
             print(type(full_name))
-            vexatious= await check_for_vexatious(input_text)
             return jsonify({'full_name': full_name})
         else:
             return render_template('index.html')
@@ -645,6 +673,7 @@ async def vex():
             input_text = request.form.get("input_text")
             email_id = request.form.get("email_id")
             timestamp = request.form.get("timestamp")
+
             vexatious= await check_for_vexatious(input_text)
             return jsonify({'vex': vexatious})
         else:
@@ -662,12 +691,34 @@ async def vex():
 async def identify_parts():
      result_list=None
      if 'user' in session:
-            foi_request=session.get('foi_req')
+            
+            
+            print("trying")
+            foi_request=session.get("foi_request")
+#             foi_request='''Dear North Somerset Council, 
+ 
+# Under the Freedom of Information Act 2000, I am writing to request information about the council's environmental initiatives and sustainability efforts. Specifically, I am interested in understanding the council's strategies and actions in promoting environmental sustainability within the local area. Please provide information on the following: 
+ 
+# * What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets? 
+# * How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated. 
+# * What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years? 
+# *  Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions? 
+# * What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact? 
+# I understand that under the Act, I should be entitled to a response within 20 working days of your receipt of this request. If my request cannot be met within this time frame, please inform me of the anticipated delay. 
+ 
+# Thank you for your assistance. 
+# Sincerely, 
+# Rodolfo Boni '''
+            print("hhhhhh")
+            print(foi_request)
+            
+            # result_list =await identify_part(foi_request)
             result_list =await identify_part(foi_request)
             print(result_list)
             print(type(result_list))
             result_list=safe_literal_eval(result_list)
             print(result_list)
+            session["request_list"]=result_list
             return render_template("identify_parts.html", result=result_list)
             
      else:
@@ -678,18 +729,59 @@ async def identify_parts():
         </script>
         '''
         
+@application.route("/vexatious", methods=["GET","POST"])
+async def vexatious():
+    if 'user' in session:
+        if request.method =="POST":
+            
+            # valid_dict=request.form.get('validation_dict_json')
+            
+            request_list=session.get("request_list")
+           
+            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
+            print(request_list)
+
+            gpt_vexatious_dict =await check_for_vexatious(request_list)
+            vexatious_dict=parse_terminal_dict(gpt_vexatious_dict)
+            vexatious_dict=ast.literal_eval(vexatious_dict)
+            print(vexatious_dict)
+            
+            vexatious_flag={key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
+            session["vexatious_flag"]=vexatious_flag
+            vex = any(value == 0 for value in vexatious_flag.values())
+            refusal = None
+            if vex:
+                foi_request=session.get("foi_request")
+                reason="it is a vexaious request"
+                refusal=await refusal_notice(reason, foi_request)
+            return render_template("vexatious.html", vexatious_dict=vexatious_dict, refusal=refusal)
+        else:
+            return render_template("vexatious.html", vexatious_dict=vexatious_dict)
+    else:
+         return '''
+        <script>
+            alert('Sorry but you need to login to work with FOI');
+            window.location = '/login';  
+        </script>
+        '''
+  
+        
 
 @application.route("/validate", methods=["GET","POST"])
 async def validation():
     if 'user' in session:
         if request.method =="POST":
-            request_list=request.form.get('result_list')
-            session["request_list"]=request_list
+
+            request_list=session.get("request_list")
+            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
+            
+
             validation_result =await validation_of_request(request_list)
             validation_result=parse_terminal_dict(validation_result)
             validation_dict = ast.literal_eval(validation_result)
             session["valid_dict"]=validation_dict
-            return render_template("validation.html", validation_dict=validation_dict)
+
+            return render_template("validation.html", validation_dict=validation_dict, vexatious_flag=session.get("vexatious_flag"))
         else:
             return render_template("validation.html", validation_dict=validation_dict)
     else:
@@ -699,47 +791,12 @@ async def validation():
             window.location = '/login';  
         </script>
         '''
-    
-# @application.route("/vexatious", methods=["GET","POST"])
-# async def vexatious():
-#     if 'user' in session:
-#         if request.method =="POST":
-#             # valid_dict=request.form.get('validation_dict_json')
-#             valid_dict=session.get("valid_dict")
-#             print(valid_dict)
-#             print(type(valid_dict))
-#             # valid_dict=ast.literal_eval(valid_dict)
-#             valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
-#             session["valid_flag"]=valid_flag
-#             request_list=session.get("request_list")
-#             print(request_list)
-
-#             gpt_vexatious_dict =await check_for_vexatious(session.get("request_list"))
-#             vexatious_dict=parse_terminal_dict(gpt_vexatious_dict)
-#             vexatious_dict=ast.literal_eval(vexatious_dict)
-#             session["vexatious_dict"]=vexatious_dict
-#             vexatious_flag={key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
-#             vex = any(value == 0 for value in vexatious_flag.values())
-#             refusal = None
-#             if vex:
-#                 foi_request=session.get("foi_req")
-#                 reason="it is a vexaious request"
-#                 refusal=await refusal_notice(reason, foi_request)
-#             return render_template("vexatious.html", vexatious_dict=vexatious_dict, valid_flag=valid_flag)
-#         else:
-#             return render_template("vexatious.html", vexatious_dict=vexatious_dict, valid_flag=valid_flag)
-#     else:
-#          return '''
-#         <script>
-#             alert('Sorry but you need to login to work with FOI');
-#             window.location = '/login';  
-#         </script>
-#         '''
 
 
 @application.route("/check_repeated", methods=["GET","POST"])
 async def check_repeated():
     if 'user' in session:
+        
         if request.method =="POST":
 
             email = session.get("email_id")
@@ -749,22 +806,25 @@ async def check_repeated():
 
             valid_dict=session.get("valid_dict")
             valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
+            session["valid_flag"]=valid_flag
             print(valid_flag)
             print(type(valid_flag))
             print("in repeated ")
-           
-    
+            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
+
+            
             previous_requests = get_requests_by_email(email, latest_timestamp)
             gpt_repeated_dict = await check_for_repeated(previous_requests, session.get("request_list"))
             repeated_dict=parse_terminal_dict(gpt_repeated_dict)
             repeated_dict = ast.literal_eval(repeated_dict)
             repeated_flag = {key: 0 if value.startswith("Repeated") else 1 for key, value in repeated_dict.items()}
-
+            # session.pop("vexatious_flag", None)
+            # session.pop("valid_dict", None)
             session["repeated_dict"] = repeated_dict
 
-            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag)
+            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag,vexatious_flags=session.get("vexatious_flag"))
         else:
-            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag)
+            return render_template("check_repeated.html", repeated_dict=session.get("repeated_dict"), valid_flag=session.get("valid_flag"), vexatious_flags=session.get("vexatious_flag"))
     else:
          return '''
         <script>
@@ -774,91 +834,92 @@ async def check_repeated():
         '''
 @application.route("/completeness_check", methods=["GET","POST"])
 async def check_completeness():
-    if 'user' in session:
-        if request.method =="POST":
-            department_list=[]
-            request_list=session.get("request_list")
-            request_list=ast.literal_eval(request_list)
-            complete_dict = await process_requests(request_list)
-            for key, value in complete_dict.items():
+    if request.method =="POST":
+        department_list=[]
+        
+        request_list=session.get("request_list")
+        print("checking completeness endpoint")
+        print(request_list)
+        # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
+        # global request_list
+        # print(request_list)
+        # request_list=ast.literal_eval(request_list)
+        complete_dict = await process_requests(request_list)
+        for key, value in complete_dict.items():
     # Check if the value is a string and contains '%' sign
-                if isinstance(value, str) and '%' in value:
-                    # Remove '%' sign and convert the value to float
-                    percentage_value = float(value.replace('%', ''))
-                    # Check if the percentage is less than 100
-                    if percentage_value < 100:
-                        department =await get_department(key)
-                        department_list.append(department)
+            if isinstance(value, str) and '%' in value:
+                # Remove '%' sign and convert the value to float
+                percentage_value = float(value.replace('%', ''))
+                # Check if the percentage is less than 100
+                if percentage_value < 100:
+                    department =await get_department(key)
+                    department_list.append(department)
 
-                    else:
-                        department_list.append("-")
                 else:
-                    print(f"The value for key '{key}' is not in string format or doesn't contain '%' sign.")
-            
+                    department_list.append("-")
+            else:
+                print(f"The value for key '{key}' is not in string format or doesn't contain '%' sign.")
+        
 
-            services = [
-                "Adult Services",
-                "Children's Services",
-                "Education Services",
-                "Environmental Services",
-                "Housing",
-                "Planning and Development",
-                "Transport and Highways",
-                "Public Health",
-                "Leisure and Culture",
-                "Finance and Resources",
-                "Human Resources",
-                "Legal Services",
-                "Regulatory Services",
-                "Community Services",
-                "Information Technology",
-                "Customer Services"
-            ]
-            print(complete_dict)
-            print("^^^^^^^^^^^^^^^")
-            print(department_list)
-            session["complete_dict"]=complete_dict
-            session["department_list"]=department_list
-            return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
-        else:
-            return render_template("completeness.html", complete_dict=session.get("complete_dict"), department_list=session.get("department_list"))
+        services = [
+            "Adult Services",
+            "Children's Services",
+            "Education Services",
+            "Environmental Services",
+            "Housing",
+            "Planning and Development",
+            "Transport and Highways",
+            "Public Health",
+            "Leisure and Culture",
+            "Finance and Resources",
+            "Human Resources",
+            "Legal Services",
+            "Regulatory Services",
+            "Community Services",
+            "Information Technology",
+            "Customer Services"
+        ]
+        print(complete_dict)
+        print("^^^^^^^^^^^^^^^")
+        print(department_list)
+        
+        return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
     else:
-         return '''
-        <script>
-            alert('Sorry but you need to login to work with FOI');
-            window.location = '/login';  
-        </script>
-        '''
+        return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
+                
+    
 
 @application.route("/retrieval", methods=["GET","POST"])
 async def retrieval():
-    if 'user' in session:
+    # if 'user' in session:
         if request.method =="POST":
+            session.pop("timestamp", None)
+            session.pop("email_id", None)
             selected_values = request.form.getlist('cost_limit')
             print(selected_values)  
             print("retrieval endpoint")
-            request_list = session.get("request_list")
-            request_list=ast.literal_eval(request_list)
-            documents = []
-            responses = []
-            tasks = []
-            print(len(request_list))
-            for request_item in request_list:
-                tasks.append(process_request_item(request_item))
-            responses = await asyncio.gather(*tasks)
-            print("checks before printing the whole thing ")
-            print(responses)
+            # request_list = session.get("request_list")
+            # # request_list=ast.literal_eval(request_list)
+            # documents = []
+            # responses = []
+            # tasks = []
+            # print(len(request_list))
+            # for request_item in request_list:
+            #     tasks.append(process_request_item(request_item))
+            # responses = await asyncio.gather(*tasks)
+            # print("checks before printing the whole thing ")
+            # print(responses)
 
-            # for response in responses:
-            #         exemptions = response.get("exemptions", [])
-            #         for exemption in exemptions:
-            #             exemption["exemptions_length"] = len(exemptions)
-            response_dict = responses
-            session["response_dict"]=response_dict
-            print("duduudud")
-            print(response_dict)
-            print(type(response_dict))
-            responses_json = json.dumps(response_dict)
+            # # for response in responses:
+            # #         exemptions = response.get("exemptions", [])
+            # #         for exemption in exemptions:
+            # #             exemption["exemptions_length"] = len(exemptions)
+            # response_dict = responses
+            # # session["response_dict"]=response_dict
+            # print("duduudud")
+            # print(response_dict)
+            # print(type(response_dict))
+            # responses_json = json.dumps(response_dict)
             redactions=["Section 21: Information accessible by other means",
                         "Section 22: Information intended for future publication",
                         "Section 23: Security bodies",
@@ -881,45 +942,153 @@ async def retrieval():
                         "Section 42 - Legal Professional Privilege",
                         "Section 43 - Trade Secrets and Prejudice to commercial interests",
                         "Section 44 - Prohibitions on Disclosure"]
-            return render_template("retrieval.html", responses=response_dict, redactions=redactions, responses_json=responses_json)
+            dummy_var=[{'request': 'Cause of the fire and initial investigation findings.', 'response': 'The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more.', 'exemptions': {'Section 41 - confidentiality': 'Evidence: The exact sentence or content that needs to be redacted from the response is not present in the provided response chunk.'}}, {'request': 'Any prior safety concerns regarding the warehouse.', 'response': 'Our records indicate the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. Were there any indicators or prior safety concerns reported about this warehouse?', 'exemptions': {'Section 41 - confidentiality': 'Evidence: Could you please provide more details about the cause of the fire and the status of the investigation?'}}, {'request': 'Correspondence between [School Name] and the [Department Name].', 'response': "Email 1: From Dean to Head of Police Subject: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, I hope this message finds you in these trying times. I am reaching out concerning the devastating fire incident near our school, which tragically resulted in the loss of two young boys and a girl: Mark Owly, Edward Obri, and Helen Stars. Our community is deeply saddened, and we extend our heartfelt condolences to the families affected. Could you please provide more details about the cause of the fire and the status of the investigation? Sincerely, Dr. Emily Stanton Dean, Academy of Future Leaders Email 2: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Dr. Stanton, Thank you for your message and the expression of sympathy. The loss of these young lives is a profound tragedy. As our records the incident occured between 12:46am and 2:56am. The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more. Sincerely, Chief Mark Harrison London Metropolitan Police Email 3: From Dean to Head of Police Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, Thank you for the update. Were there any indicators or prior safety concerns reported about this warehouse? Our community is eager to understand how such a tragedy could occur. Best, Dr. Emily Stanton Email 4: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dr. Stanton, Document Prepared By: Office of the Chair, Bank of England Date: February 26, 2024 Date: June 26, 2023 To: Councillor Kathleen Houlton Kathleen.houlton@gmail.com Dear Councillor Kathleen Houlton, Thank you for your email and your concerns regarding the proposed alterations to the service road on the A580 in Lowton. We appreciate your dedication to the welfare of your constituents, and we are committed to addressing these concerns in a responsible and transparent manner. To provide you with the information you've requested, we are sharing the following details: 1. The proposed alterations to the service road are part of an ongoing development project aimed at improving traffic flow and enhancing road safety in the Lowton area. 2. Extensive studies and assessments have been conducted as part of the planning process. These studies include traffic impact assessments, environmental impact assessments, and safety evaluations. The project team has worked closely with relevant authorities and experts to ensure that the proposed alterations align with safety and environmental standards. 3. We are in the process of scheduling a public consultation, which will allow residents and stakeholders to provide input and express their concerns. The consultation is expected to take place in August 2023, and detailed information about the event will be shared with the community well in advance. 4. We have attached a summary of the key objectives and proposed changes for your reference. Please feel free to reach out to us if you require any further information or if you would like to be directly involved in the consultation process to represent the concerns of your constituents. We appreciate your proactive approach in engaging with this matter and look forward to working together to ensure that the alterations to the service road benefit the local community. Sincerely, Michelle Krown Wigan Council Attachment: Summary of Proposed Alterations and Objectives Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements. Your engagement and discretion in this matter is greatly appreciated.", 'exemptions': {'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.', 'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.'}}, {'request': 'Information regarding community involvement and relief efforts.', 'response': "Thank you for your school's compassion and involvement. We will coordinate with you on the logistics and inform you of any additional ways you can help. Regards, Chief Harrison. Please advise how our community can provide information that may assist in the investigation. We are committed to helping in any way we can. Thank you, Dr. Stanton. Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements.", 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}, {'request': "Details concerning His Majesty King Charles' notification and potential visit by Prince William and Princess Kate.", 'response': 'Dr. Stanton, Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter. Your engagement and discretion in this matter is greatly appreciated. Best regards, Chief Mark Harrison', 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}]
+            return render_template("retrieval.html")
         else:
-            return render_template("retrieval.html", responses_dict=session.get("response_dict"))
-    else:
-         return '''
-        <script>
-            alert('Sorry but you need to login to work with FOI');
-            window.location = '/login';  
-        </script>
-        '''
+            request_list = session.get("request_list")
+            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
+            # global request_list
+            # request_list=ast.literal_eval(request_list)
+            documents = []
+            responses = []
+            tasks = []
+            print(len(request_list))
+            for request_item in request_list:
+                tasks.append(process_request_item(request_item))
+            responses = await asyncio.gather(*tasks)
+            print("checks before printing the whole thing ")
+            print(responses)
+
+            # for response in responses:
+            #         exemptions = response.get("exemptions", [])
+            #         for exemption in exemptions:
+            #             exemption["exemptions_length"] = len(exemptions)
+            response_dict = responses
+            # session["response_dict"]=response_dict
+            print("duduudud")
+            print(response_dict)
+            print(type(response_dict))
+           
+            return jsonify(response_dict)
+            # return render_template("retrieval.html", responses_dict=session.get("response_dict"))
+    # else:
+    #      return '''
+    #     <script>
+    #         alert('Sorry but you need to login to work with FOI');
+    #         window.location = '/login';  
+    #     </script>
+    #     '''
+
+# @application.route("/retrieval", methods=["GET","POST"])
+# async def retrieval():
+#     global dummy_var
+#     if 'user' in session:
+#         if request.method =="POST":
+#             selected_values = request.form.getlist('cost_limit')
+            
+            
+#             redactions=["Section 21: Information accessible by other means",
+#                         "Section 22: Information intended for future publication",
+#                         "Section 23: Security bodies",
+#                         "Section 24: National Security",
+#                         "Section 26: Defence",
+#                         "Section 27: International Relations",
+#                         "Section 28: Realtions within the UK",
+#                         "Section 29: The Economy",
+#                         "Section 30 & 31: Law enforcement",
+#                         "Section 32: Court Records",
+#                         "Section 33: Public Audits",
+#                         "Section 34: Parliamentary Privilege",
+#                         "Section 35: Govenment Policy",
+#                         "Section 36 - Prejudice to the effective conduct of public affairs",
+#                         "Section 37 - Commumincation with His Majesty",
+#                         "Section 38 - Health and Safety",
+#                         "Section 39 - Environmental Information",
+#                         "Section 40 - Personal Information",
+#                         "Section 41 - Confidentiality",
+#                         "Section 42 - Legal Professional Privilege",
+#                         "Section 43 - Trade Secrets and Prejudice to commercial interests",
+#                         "Section 44 - Prohibitions on Disclosure"]
+            
+#             return render_template("retrieval.html")
+#         else:
+#             dummy_var=[{'request': 'Cause of the fire and initial investigation findings.', 'response': 'The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more.', 'exemptions': {'Section 41 - confidentiality': 'Evidence: The exact sentence or content that needs to be redacted from the response is not present in the provided response chunk.'}}, {'request': 'Any prior safety concerns regarding the warehouse.', 'response': 'Our records indicate the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. Were there any indicators or prior safety concerns reported about this warehouse?', 'exemptions': {'Section 41 - confidentiality': 'Evidence: Could you please provide more details about the cause of the fire and the status of the investigation?'}}, {'request': 'Correspondence between [School Name] and the [Department Name].', 'response': "Email 1: From Dean to Head of Police Subject: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, I hope this message finds you in these trying times. I am reaching out concerning the devastating fire incident near our school, which tragically resulted in the loss of two young boys and a girl: Mark Owly, Edward Obri, and Helen Stars. Our community is deeply saddened, and we extend our heartfelt condolences to the families affected. Could you please provide more details about the cause of the fire and the status of the investigation? Sincerely, Dr. Emily Stanton Dean, Academy of Future Leaders Email 2: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Dr. Stanton, Thank you for your message and the expression of sympathy. The loss of these young lives is a profound tragedy. As our records the incident occured between 12:46am and 2:56am. The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more. Sincerely, Chief Mark Harrison London Metropolitan Police Email 3: From Dean to Head of Police Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, Thank you for the update. Were there any indicators or prior safety concerns reported about this warehouse? Our community is eager to understand how such a tragedy could occur. Best, Dr. Emily Stanton Email 4: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dr. Stanton, Document Prepared By: Office of the Chair, Bank of England Date: February 26, 2024 Date: June 26, 2023 To: Councillor Kathleen Houlton Kathleen.houlton@gmail.com Dear Councillor Kathleen Houlton, Thank you for your email and your concerns regarding the proposed alterations to the service road on the A580 in Lowton. We appreciate your dedication to the welfare of your constituents, and we are committed to addressing these concerns in a responsible and transparent manner. To provide you with the information you've requested, we are sharing the following details: 1. The proposed alterations to the service road are part of an ongoing development project aimed at improving traffic flow and enhancing road safety in the Lowton area. 2. Extensive studies and assessments have been conducted as part of the planning process. These studies include traffic impact assessments, environmental impact assessments, and safety evaluations. The project team has worked closely with relevant authorities and experts to ensure that the proposed alterations align with safety and environmental standards. 3. We are in the process of scheduling a public consultation, which will allow residents and stakeholders to provide input and express their concerns. The consultation is expected to take place in August 2023, and detailed information about the event will be shared with the community well in advance. 4. We have attached a summary of the key objectives and proposed changes for your reference. Please feel free to reach out to us if you require any further information or if you would like to be directly involved in the consultation process to represent the concerns of your constituents. We appreciate your proactive approach in engaging with this matter and look forward to working together to ensure that the alterations to the service road benefit the local community. Sincerely, Michelle Krown Wigan Council Attachment: Summary of Proposed Alterations and Objectives Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements. Your engagement and discretion in this matter is greatly appreciated.", 'exemptions': {'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.', 'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.'}}, {'request': 'Information regarding community involvement and relief efforts.', 'response': "Thank you for your school's compassion and involvement. We will coordinate with you on the logistics and inform you of any additional ways you can help. Regards, Chief Harrison. Please advise how our community can provide information that may assist in the investigation. We are committed to helping in any way we can. Thank you, Dr. Stanton. Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements.", 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}, {'request': "Details concerning His Majesty King Charles' notification and potential visit by Prince William and Princess Kate.", 'response': 'Dr. Stanton, Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter. Your engagement and discretion in this matter is greatly appreciated. Best regards, Chief Mark Harrison', 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}]
+#             return jsonify(dummy_var)
+#             # return render_template("retrieval.html", responses_dict=session.get("response_dict"))
+#     else:
+#          return '''
+#         <script>
+#             alert('Sorry but you need to login to work with FOI');
+#             window.location = '/login';  
+#         </script>
+#         '''
 
 @application.route("/response", methods=["GET","POST"])
-async def generate_response():
+async def response():
+        global final
 
-    if 'user' in session:
+    # if 'user' in session:
         if request.method =="POST":
-            responses=request.form.get("responses")
-            foi_request=session.get("foi_req")
-            request_list = session.get("request_list")
+            # global request_list, foi
+            # responses=request.form.get("responses")
+            request_list=session.get("request_list")
+            data=request.get_json()
+
+            extracted_data = [{'question': item['question'], 'answer': item['answer']} for item in data['data']]
+            
+            final=extracted_data
+            print("printinf data")
+            print(extracted_data)
+            # print(data)
+            
+            return jsonify({"message":"successss"})
+        else:
+            foi_request=session.get("foi_request")
+            # request_list = session.get("request_list")
+            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
+
             valid_dict = session.get("valid_dict")
-            vex_dict = session.get("vex_dict")
+            vex_dict = session.get("vexatious_flag")
             repeated_dict = session.get("repeated_dict")
+            request_list=session.get("request_list")
+
             acknowledgment_text = await generate_acknowledgement_letter(request_list, valid_dict, vex_dict, repeated_dict)
             print("acknowledement letter")
             print(acknowledgment_text)
-
+#             foi='''Dear North Somerset Council, 
+ 
+# Under the Freedom of Information Act 2000, I am writing to request information about the council's environmental initiatives and sustainability efforts. Specifically, I am interested in understanding the council's strategies and actions in promoting environmental sustainability within the local area. Please provide information on the following: 
+ 
+# * What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets? 
+# * How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated. 
+# * What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years? 
+# *  Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions? 
+# * What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact? 
+# I understand that under the Act, I should be entitled to a response within 20 working days of your receipt of this request. If my request cannot be met within this time frame, please inform me of the anticipated delay. 
+ 
+# Thank you for your assistance. 
+# Sincerely, 
+# Rodolfo Boni '''
             # response_dict=session.get("response_dict")
             # print(response_dict)
-            response_letter=await generate_response_letter(foi_request, responses)
+            
+            response_letter=await generate_response_letter(foi_request, final)
+
             return render_template("response.html", response=response_letter, acknowledgment_text=acknowledgment_text)
-        else:
-            return render_template("response.html", response=response_letter, acknowledgment_text=acknowledgment_text)
-    else:
-         return '''
-        <script>
-            alert('Sorry but you need to login to work with FOI');
-            window.location = '/login';  
-        </script>
-        '''
+    # else:
+    #      return '''
+    #     <script>
+    #         alert('Sorry but you need to login to work with FOI');
+    #         window.location = '/login';  
+    #     </script>
+    #     '''
+
+
+@application.route("/refusal", methods=["POST", "GET"])
+def refusal():
+    if request.method =="POST":
+        refusal=request.form("refusal")
+        return render_template("refusal.html", refusal_text=refusal)
 
 
 @application.route("/save_document", methods=["POST"])
@@ -948,6 +1117,8 @@ def save_document():
 @application.route("/logout")
 async def logout():
     session.pop('user')
+    
+    
     return redirect(url_for('login'))
 
 

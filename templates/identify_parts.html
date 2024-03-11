@@ -175,6 +175,38 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Added */
+            z-index: 9999;
+            backdrop-filter: blur(5px); /* Added to blur the overlay */
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px; /* Added */
+            font-size: 16px; /* Added */
+        }
     </style>
     <title>FOI</title>
   </head>
@@ -209,11 +241,15 @@
             <input type="hidden" name="result_list" value="{{ result }}" />
             <button type="submit">Previous</button>
           </form>
-          <form action="/validate" method="post">
+          <form id="nextForm" action="/vexatious" method="post">
             <input type="hidden" name="result_list" value="{{ result }}" />
             <button type="submit">Next</button>
           </form>
         </div>
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+          <div class="loading-text">Checking for vexatiousness</div>
+      </div>
       </div>
     </div>
     <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
@@ -221,6 +257,20 @@
        document.querySelector('.logout-btn').addEventListener('click', function() {
         window.location.href = "/logout"; // Redirect to the /logout route
     });
+      document.getElementById('nextForm').addEventListener('submit', function() {
+          showLoading();
+      });
+      
+      function hideLoading() {
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.display = 'none';
+      }
+      function showLoading() {
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.display = 'flex';
+      }
+
+
     </script>
   </body>
 </html>

@@ -6,7 +6,7 @@
     <title>Response Letter</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        body {
+       body {
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f4;
             color: #333;
@@ -15,19 +15,87 @@
 
         .container {
             display: flex;
-            flex-direction: column; /* Change flex direction to column */
-            height: 100vh; /* Set container height to full viewport height */
+            justify-content: space-between; /* Align items side by side */
+            margin-top: 20px; /* Add margin between containers */
         }
 
         .response-container, .acknowledgment-container {
-            flex: 1;
+            width: calc(50% - 20px); /* Each container takes up half the width with some margin */
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Center align content */
-            margin-bottom: 20px; /* Add margin between containers */
-}
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .custom-textarea {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 16px;
+            resize: none; /* Prevent resizing */
+            transition: border-color 0.3s ease; /* Smooth transition on hover/focus */
+            height: 200px; /* Adjust the height as needed  */
+        }
+
+        .custom-textarea:focus,
+        .custom-textarea:hover {
+            border-color: #005eb8; /* Highlight border on hover/focus */
+            outline: none; /* Remove default focus outline */
+        }
+
+        .custom-button {
+            display: inline-block;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #005eb8;
+            transition: background-color 0.3s ease; /* Smooth transition on hover */
+            margin-top: 10px; /* Add margin */
+        }
+
+        .custom-button:hover {
+            background-color: #004080; /* Darker shade on hover */
+        }
+
+        h1, h2 {
+            margin: 0;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 10px; /* Provide a bit of space between header and h2 */
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        a.custom-button {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #005eb8;
+            padding: 12px 24px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        a.custom-button:hover {
+            background-color: #004080;
+        }
 
 .header {
         padding: 1.25rem 2rem;
@@ -131,23 +199,53 @@
         } 
 
         .header {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
 
-        .header img {
-            height: 70px;
-        }
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
+
+      .wrapper {
+        width: 90%;
+        min-width: 250px;
+        max-width: 1200px;
+        padding: calc(var(--navbar-height) + 3rem) 1rem 0rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+      }
+
 
         .wrapper {
             padding: calc(100px + 40px) 20px 20px;
@@ -156,13 +254,20 @@
         }
 
         .container {
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-            padding: 40px;
-            margin-top: 20px;
+            display: flex;
+            justify-content: space-between; /* Align items side by side */
+            margin-top: 20px; /* Add margin between containers */
         }
 
+        .response-container, .acknowledgment-container {
+            flex: 0 0 calc(50% - 20px); /* Each container takes up half the width with some margin */
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
         .input-container label {
             display: block;
             margin-bottom: 10px;
@@ -266,16 +371,43 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Added */
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 20px; /* Added */
+            font-size: 16px; /* Added */
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="developer-details">
-            <img src="static/Logo-Primary.png" width="100px" />
-          </div>
-          <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
-        <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
-        <button class="logout-btn">Logout</button>
+          <img src="static/Logo-Primary.png" width="100px" />
+        </div>
+        <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
+      <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
+          <button class="logout-btn">Logout</button>
     </header>
     
     <div class="container">

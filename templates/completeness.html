@@ -187,6 +187,49 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
         }
+
+        .send-btn{
+            margin-top: 1rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background-color: #0d74ce;
+            color: white;
+            cursor: pointer;
+            transition: all 0.4s;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Added */
+            z-index: 9999;
+            backdrop-filter: blur(5px); /* Added to blur the overlay */
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px; /* Added */
+            font-size: 16px; /* Added */
+        }
     </style>
 </head>
 <body>
@@ -208,8 +251,8 @@
                 <tr>
                     <th>Component</th>
                     <th>Completeness</th>
-                    <th>Department</th>
                     <th>Does this request exceed the statutory cost limit? If yes, enter the amount</th> <!-- New column header -->
+                    <th>Redirect to this department for more Information!</th>
                 </tr>
             </thead>
             <tbody>
@@ -217,6 +260,15 @@
                     <tr>
                         <td style="text-align: center;">{{ component }}</td>
                         <td style="text-align: center;">{{ result }}</td>
+                        
+                        <td style="text-align: center;">
+                            
+                            <select name="cost_limit{{ loop.index }}"  class="cost-limit-dropdown">
+                                <option value="No" selected>No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </form>
+                        </td>
                         <td style="text-align: center;">
 
                             {% if result == "100%" %}
@@ -233,15 +285,10 @@
                                         {% endif %}
                                     {% endfor %}
                                 </select>
+                                <button class="send-btn">Send Request</button>
                             {% endif %}
-                        </td>
-                        <td style="text-align: center;">
+
                             
-                            <select name="cost_limit{{ loop.index }}"  class="cost-limit-dropdown">
-                                <option value="No" selected>No</option>
-                                <option value="Yes">Yes</option>
-                            </select>
-                        </form>
                         </td> <!-- New column with input text box -->
                     </tr>
                 {% endfor %}
@@ -252,7 +299,7 @@
                 <form action="/completeness" method="get">
                     <button type="submit" class="button">Previous</button>
                 </form>
-                <form action="/retrieval" method="post" id="completeness-form">
+                <form id="nextForm" action="/retrieval" method="post" id="completeness-form">
                     <input type="hidden" name="cost_limit">
                     <button type="submit" class="button">Next</button>
                 </form>
@@ -265,16 +312,23 @@
         
         
     </div>
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Retrieving the contents....</div>
+        <div id="messageContainer" style="display: none;"></div>
+    </div>
 </div>
     <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
     <script>
         document.querySelector('.logout-btn').addEventListener('click', function() {
             window.location.href = "/logout"; // Redirect to the /logout route
         });
+        
         // Wait for the DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
         console.log("{{complete_dict}}");
         // Get all department name spans
+        document.getElementById('loadingOverlay').style.display = 'none';
         const departmentNames = document.querySelectorAll('.department-name');
 
         // Add click event listener to each department name span

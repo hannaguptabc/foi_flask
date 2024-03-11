@@ -239,7 +239,7 @@
         position: absolute;
         overflow-x: hidden;
         height: 10px;
-        width: 75%;
+        width: 50%;
         display: flex;
         align-items: center;
         left: 52%;
@@ -264,11 +264,11 @@
         transition: transform 1.2s ease-in-out;
       }
       .status-container .progress_bar [data-step="1"] {
-        transform: translateX(50%);
-      }
-      .status-container .progress_bar [data-step="2"] {
         transform: translateX(100%);
       }
+      /* .status-container .progress_bar [data-step="2"] {
+        transform: translateX(100%);
+      } */
 
       .status-container .status {
         display: flex;
@@ -383,12 +383,12 @@
               </div>
               <p style="font-weight: 500">Processing Fullname request</p>
             </div>
-            <div class="status" id="vexatious-cont">
+            <!-- <div class="status" id="vexatious-cont">
               <div class="img-container">
                 <img src="static/pending.svg" width="24" />
               </div>
               <p>Vexatious request</p>
-            </div>
+            </div> -->
             <div class="status" id="processing-cont">
               <div class="img-container">
                 <img src="static/pending.svg" width="24" />
@@ -539,6 +539,7 @@ form.addEventListener('submit', async function(event) {
         console.error('Error:', error);
     }
 });
+
 form.addEventListener('submit', async function(event) {
 // Prevent default form submission
 event.preventDefault();
@@ -582,8 +583,8 @@ reject2.addEventListener('click', function(){
 
 
 approve2.addEventListener('click', async function(){
-    confirmContainer2.style.display = "none"
-    completeStep(vexatiousContainer);
+    // confirmContainer2.style.display = "none"
+    completeStep(fullnameContainer);
       const statusText1 = processingContainer.querySelector("p");
       statusText1.textContent = "Processing your request";
       statusText1.style.fontWeight = "500";
@@ -649,7 +650,15 @@ console.log(data);
 if(data.full_name === 'False'){
     confirmContainer.style.display = "block"
 }else{
-    callStepTwo()
+    // callStepTwo()
+    completeStep(fullnameContainer);
+      const statusText1 = processingContainer.querySelector("p");
+      statusText1.textContent = "Processing your request";
+      statusText1.style.fontWeight = "500";
+      //   currentStatus.textContent = "Processing Vexatious request";
+      currentStep += 1;
+      filledLine.setAttribute("data-step", currentStep);
+      window.location.href = "{{ url_for('identify_parts') }}";
 }
 
 reject.addEventListener('click', function(){
@@ -659,7 +668,15 @@ reject.addEventListener('click', function(){
 
 approve.addEventListener('click', async function(){
     confirmContainer.style.display = "none"
-    callStepTwo()
+    // callStepTwo()
+    completeStep(fullnameContainer);
+      const statusText1 = processingContainer.querySelector("p");
+      statusText1.textContent = "Processing your request";
+      statusText1.style.fontWeight = "500";
+      //   currentStatus.textContent = "Processing Vexatious request";
+      currentStep += 1;
+      filledLine.setAttribute("data-step", currentStep);
+      window.location.href = "{{ url_for('identify_parts') }}";
 });
 })
 

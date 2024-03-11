@@ -21,23 +21,40 @@
         } 
 
         .header {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, #0066cc 0%, #0047b3 100%);
-            color: #fff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
 
-        .header img {
-            height: 70px;
-        }
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
 
         .wrapper {
             padding: calc(100px + 40px) 20px 20px;
@@ -146,9 +163,6 @@
             right: 20px;
             z-index: 1100;
         }
-        th:last-child, td:last-child {
-            text-align: center; /* Center align the content in the last column */
-        }
         .blue-box {
             background-color: #0066cc;
             color: white;
@@ -156,23 +170,57 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Added */
+            z-index: 9999;
+            backdrop-filter: blur(5px); /* Added to blur the overlay */
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px; /* Added */
+            font-size: 16px; /* Added */
+        }
     </style>
 </head>
 <body>
     <header class="header">
-        <div><img src="static/Logo-Primary.png" alt="Company Logo"/></div>
-        <div><img src="static/image.png" alt="NHS Logo"/></div>
+        <div class="developer-details">
+            <img src="static/Logo-Primary.png" width="100px" />
+          </div>
+          <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
+        <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
         <button class="logout-btn">Logout</button>
     </header>
     <div class="wrapper">
         <div class="container">
             <h2>Vexatious Result</h2>
-            {% if vexatious_dict and valid_flag %}
+            {% if vexatious_dict%}
                 <table>
                     <thead>
                         <tr>
                             <th>Component</th>
-                            <th>Validation</th>
                             <th>Vexatious Result</th>
                         </tr>
                     </thead>
@@ -180,14 +228,13 @@
                         {% for component, result in vexatious_dict.items() %}
                             <tr>
                                 <td>{{ component }}</td>
-                                <td style="text-align: center;">{% if valid_flag[component] == 1 %} &#10004; {% else %} &#10008; {% endif %}</td>
                                 <td style="text-align: center;">{{ result }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 <div class="btn-wrapper">
-                    <form action="/validation" method="get">
+                    <form action="/validate" method="get">
                         <button type="submit" class="button">Previous</button>
                     </form>
                     {% if refusal %}
@@ -196,15 +243,18 @@
                         <button type="submit" class="button">Generate Refusal Letter</button>
                     </form>
                     {% endif %}
-                    <form action="/check_repeated" method="post">
-                        <input type="hidden" name="vexatious_dict_json" value="{{ vexatious_dict | tojson | safe }}">
-                        <input type="hidden" name="valid_flag" value="{{ valid_flag | tojson | safe }}">
+                    <form id="nextForm" action="/validate" method="post">
+
                         <button type="submit" class="button">Next</button>
                     </form>
                 </div>
             {% else %}
                 <p>No vexatious result available.</p>
             {% endif %}
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <div class="loading-text">Checking for validation</div>
+            </div>
         </div>
     </div>
     <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
@@ -212,6 +262,18 @@
         document.querySelector('.logout-btn').addEventListener('click', function() {
             window.location.href = "/logout"; // Redirect to the /logout route
         });
+        document.getElementById('nextForm').addEventListener('submit', function() {
+          showLoading();
+      });
+      
+      function hideLoading() {
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.display = 'none';
+      }
+      function showLoading() {
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.display = 'flex';
+      }
     </script>
 </body>
 </html>

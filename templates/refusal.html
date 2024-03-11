@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refusal Letter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+
+body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+        }
+
+        
+        .custom-textarea {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 16px;
+            resize: none; /* Prevent resizing */
+            transition: border-color 0.3s ease; /* Smooth transition on hover/focus */
+            height: 200px; /* Adjust the height as needed  */
+        }
+
+        .custom-textarea:focus,
+        .custom-textarea:hover {
+            border-color: #005eb8; /* Highlight border on hover/focus */
+            outline: none; /* Remove default focus outline */
+        }
+
+        .custom-button {
+            display: inline-block;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #005eb8;
+            transition: background-color 0.3s ease; /* Smooth transition on hover */
+            margin-top: 10px; /* Add margin */
+        }
+
+        .custom-button:hover {
+            background-color: #004080; /* Darker shade on hover */
+        }
+
+        h1, h2 {
+            margin: 0;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 10px; /* Provide a bit of space between header and h2 */
+        }
+
+        .logout-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        a.custom-button {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #005eb8;
+            padding: 12px 24px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        a.custom-button:hover {
+            background-color: #004080;
+        }
+
+.header {
+        padding: 1.25rem 2rem;
+        /* background-color: #0d74ce; */
+        background-color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+      }
+
+      .client-details {
+        color: white;
+        font-weight: 500;
+      }
+
+      .client-details h1 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .client-details h2 {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .developer-details {
+        display: flex;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: white;
+        align-items: center;
+      }
+
+        h1, h2 {
+            margin: 0;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 10px; /* Provide a bit of space between header and h2 */
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center; /* Center align the container */
+            align-items: center; /* Center align vertically */
+            height: 100vh; /* Make container fill the viewport height */
+        }
+
+        .refusal-container {
+            width: 50%; /* Set width of the refusal container */
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .custom-textarea {
+            width: 100%;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 16px;
+            resize: none; /* Prevent resizing */
+            transition: border-color 0.3s ease; /* Smooth transition on hover/focus */
+            height: 200px; /* Adjust the height as needed  */
+        }
+
+        .custom-textarea:focus,
+        .custom-textarea:hover {
+            border-color: #005eb8; /* Highlight border on hover/focus */
+            outline: none; /* Remove default focus outline */
+        }
+
+        .custom-button {
+            display: inline-block;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #005eb8;
+            transition: background-color 0.3s ease; /* Smooth transition on hover */
+        }
+
+        .custom-button:hover {
+            background-color: #004080; /* Darker shade on hover */
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="developer-details">
+          <img src="static/Logo-Primary.png" width="100px" />
+        </div>
+        <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
+      <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
+          <button class="logout-btn">Logout</button>
+    </header>
+    <div class="container">
+        <div class="refusal-container">
+            <h2>Refusal Letter</h2>
+            <textarea id="refusalTextarea" class="custom-textarea" rows="10" cols="50">{{ refusal_text }}</textarea><br>
+            <button class="custom-button" onclick="saveAndDownloadRefusal()">Download Refusal</button> <!-- Added button for refusal -->
+        </div>
+    </div>
+
+    <script>
+        function saveAndDownloadRefusal() {
+            const refusalText = document.getElementById('refusalTextarea').value;
+            downloadDocument(refusalText, 'refusal.docx');
+        }
+
+        function downloadDocument(text, filename) {
+            fetch('/save_document', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text, filename: filename }),
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+    </script>
+</body>
+</html>

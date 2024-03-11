@@ -174,6 +174,38 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Added */
+            z-index: 9999;
+            backdrop-filter: blur(5px); /* Added to blur the overlay */
+        }
+
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px; /* Added */
+            font-size: 16px; /* Added */
+        }
     </style>
 </head>
 <body>
@@ -189,34 +221,49 @@
         <div class="container">
             <h2>Validation Result</h2>
             {% if validation_dict %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Component</th>
-                            <th>Can it be recognised as a valid FOI request?</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for component, result in validation_dict.items() %}
-                            <tr>
-                                <td>{{ component }}</td>
-                                <td>{{ result }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Vexatious Flag</th>
+                    <th>Can it be recognised as a valid FOI request?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for component, result in validation_dict.items() %}
+                    <tr>
+                        <td>{{ component }}</td>
+                        <td style="text-align: center;">
+                            {% if '0' in vexatious_flags %}
+                            &#10008; <!-- Cross mark -->
+                            {% else %}
+                            &#10004; <!-- Tick mark -->
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">{{ result }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
                 <div class="btn-wrapper">
                     <form action="/identify_parts" method="get">
                         <button type="submit">Previous</button>
                       </form>
-                      <form action="/check_repeated" method="post">
+                      <form id="nextForm" action="/check_repeated" method="post">
                         <input type="hidden" name="validation_dict_json" value="{{ validation_dict }}" />
                         <button type="submit">Next</button>
                       </form>
                 </div>
+                
             {% else %}
                 <p>No validation result available.</p>
             {% endif %}
+        </div>
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">Checking for repeated request</div>
+            <div id="messageContainer" style="display: none;"></div>
         </div>
     </div>
     <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
@@ -224,6 +271,19 @@
         document.querySelector('.logout-btn').addEventListener('click', function() {
             window.location.href = "/logout"; // Redirect to the /logout route
         });
+        document.getElementById('nextForm').addEventListener('submit', function() {
+          showLoading();
+      });
+      
+      function hideLoading() {
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.display = 'none';
+      }
+      function showLoading() {
+          const loadingOverlay = document.getElementById('loadingOverlay');
+          loadingOverlay.style.display = 'flex';
+      }
+
     </script>
 </body>
 </html>
