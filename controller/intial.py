@@ -265,7 +265,7 @@ async def identify_part(text: str):
 
 async def validation_of_request(contents: list):
 
-    with open('/Users/hannagupta/Desktop/FOI/triaging/1.1/validation.txt', 'r') as file:
+    with open('triaging/1.1/validation.txt', 'r') as file:
     # Read the entire content of the file
         valid = file.read()
     
@@ -289,7 +289,7 @@ JUST RETURN THE DICTIONARY ITSELF NO EXTRA WORDS OR QOUTATIONS.
 
 
 async def check_for_vexatious(text: list):
-    vexatious_file_path = "/Users/hannagupta/Desktop/FOI/triaging/1.2/section-14-dealing-with-vexatious-requests-0-0.pdf"
+    vexatious_file_path = "triaging/1.2/section-14-dealing-with-vexatious-requests-0-0.pdf"
     pdf_text = read_pdf_mupdf(vexatious_file_path)
     content = f'''
 YYou are a Freedom of Information request responder, I will be giving you the contents of the request in form of a list and you need to process it whether that particular content can be considered vexatious or not.
@@ -316,7 +316,7 @@ DO NOT GIVE ANYTHING BUT THE DICTONARY.
 
 
 async def refusal_notice(reason, request):
-    refusal_file_path='/Users/hannagupta/Desktop/FOI/triaging/1.4/Refusal notice - guidance.pdf'
+    refusal_file_path='triaging/1.4/Refusal notice - guidance.pdf'
     pdf_text=read_pdf_mupdf(refusal_file_path)
     content = f''' DO NOT RETURN ANYTHING OTHER THAN WHAT IS ASKED AHEAD.
     You need to act like a FOI request responder and generate a refusal notice according to these regulation {pdf_text} after the request been rejected for the folloing reason "{reason}". The request is in [], [{request}]. So state the reason why it is {type} of request.
@@ -331,7 +331,7 @@ async def refusal_notice(reason, request):
 async def check_for_repeated(previous_requests, request_list):
 
 
-    repeated_file_path='/Users/hannagupta/Desktop/FOI/triaging/1.3/Dealing with repeat requests.pdf'
+    repeated_file_path='triaging/1.3/Dealing with repeat requests.pdf'
     pdf_text=read_pdf_mupdf(repeated_file_path)
     content = f''' DO NOT RETURN ANYTHING OTHER THAN WHAT IS ASKED AHEAD.
     You need to act like a FOI request responder and go through the following rules and regulations regarding repeated FOI requests:[{pdf_text}].
@@ -426,7 +426,7 @@ Now you need to frame the letter in such a way that you mention all the parts an
 
 
 async def generate_response_letter(request, responses_json):
-    response_template=read_pdf_mupdf('/Users/hannagupta/Desktop/FOI/static/FOI Response - Format.pdf')
+    response_template=read_pdf_mupdf('static/FOI Response - Format.pdf')
 
 
     content=f'''You have to act as an Freedom of Information request responder and generate a response letter to a request based on a template and also assess if there are any exemptions present.
@@ -695,20 +695,7 @@ async def identify_parts():
             
             print("trying")
             foi_request=session.get("foi_request")
-#             foi_request='''Dear North Somerset Council, 
- 
-# Under the Freedom of Information Act 2000, I am writing to request information about the council's environmental initiatives and sustainability efforts. Specifically, I am interested in understanding the council's strategies and actions in promoting environmental sustainability within the local area. Please provide information on the following: 
- 
-# * What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets? 
-# * How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated. 
-# * What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years? 
-# *  Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions? 
-# * What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact? 
-# I understand that under the Act, I should be entitled to a response within 20 working days of your receipt of this request. If my request cannot be met within this time frame, please inform me of the anticipated delay. 
- 
-# Thank you for your assistance. 
-# Sincerely, 
-# Rodolfo Boni '''
+
             print("hhhhhh")
             print(foi_request)
             
@@ -732,13 +719,9 @@ async def identify_parts():
 @application.route("/vexatious", methods=["GET","POST"])
 async def vexatious():
     if 'user' in session:
-        if request.method =="POST":
-            
-            # valid_dict=request.form.get('validation_dict_json')
-            
+        if request.method =="POST":            
             request_list=session.get("request_list")
            
-            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
             print(request_list)
 
             gpt_vexatious_dict =await check_for_vexatious(request_list)
@@ -773,7 +756,6 @@ async def validation():
         if request.method =="POST":
 
             request_list=session.get("request_list")
-            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
             
 
             validation_result =await validation_of_request(request_list)
@@ -802,7 +784,6 @@ async def check_repeated():
             email = session.get("email_id")
             
             latest_timestamp = session.get("timestamp")
-            # vexatious_dict=request.form.get('vexatious_dict_vexatious_dict = session.get("vexatious_dict")
 
             valid_dict=session.get("valid_dict")
             valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
@@ -810,7 +791,6 @@ async def check_repeated():
             print(valid_flag)
             print(type(valid_flag))
             print("in repeated ")
-            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
 
             
             previous_requests = get_requests_by_email(email, latest_timestamp)
@@ -818,8 +798,6 @@ async def check_repeated():
             repeated_dict=parse_terminal_dict(gpt_repeated_dict)
             repeated_dict = ast.literal_eval(repeated_dict)
             repeated_flag = {key: 0 if value.startswith("Repeated") else 1 for key, value in repeated_dict.items()}
-            # session.pop("vexatious_flag", None)
-            # session.pop("valid_dict", None)
             session["repeated_dict"] = repeated_dict
 
             return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag,vexatious_flags=session.get("vexatious_flag"))
@@ -840,10 +818,7 @@ async def check_completeness():
         request_list=session.get("request_list")
         print("checking completeness endpoint")
         print(request_list)
-        # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
-        # global request_list
-        # print(request_list)
-        # request_list=ast.literal_eval(request_list)
+        
         complete_dict = await process_requests(request_list)
         for key, value in complete_dict.items():
     # Check if the value is a string and contains '%' sign
@@ -891,7 +866,7 @@ async def check_completeness():
 
 @application.route("/retrieval", methods=["GET","POST"])
 async def retrieval():
-    # if 'user' in session:
+    if 'user' in session:
         if request.method =="POST":
             session.pop("timestamp", None)
             session.pop("email_id", None)
@@ -971,13 +946,13 @@ async def retrieval():
            
             return jsonify(response_dict)
             # return render_template("retrieval.html", responses_dict=session.get("response_dict"))
-    # else:
-    #      return '''
-    #     <script>
-    #         alert('Sorry but you need to login to work with FOI');
-    #         window.location = '/login';  
-    #     </script>
-    #     '''
+    else:
+         return '''
+        <script>
+            alert('Sorry but you need to login to work with FOI');
+            window.location = '/login';  
+        </script>
+        '''
 
 # @application.route("/retrieval", methods=["GET","POST"])
 # async def retrieval():
