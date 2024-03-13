@@ -552,11 +552,7 @@ def extract_json_from_braces(text):
 
 
 async def process_request_item(request_item):
-    # vectorstore = PGVector(
-    #     collection_name=COLLECTION_NAME,
-    #     connection_string=CONNECTION_STRING,
-    #     embedding_function=EMBEDDINGS,
-    # )
+    
     docs =await vectorstore.asimilarity_search_with_score(request_item)
     print("*************")
     print(docs)
@@ -617,6 +613,8 @@ async def index():
                 session.pop("vexatious_flag")
             if session.get("repeated_dict"):
                 session.pop("repeated_dict")
+            if session.get("valid_flag"):
+                session.pop("valid_flag")
 
 
             input_text = request.form.get("input_text")
@@ -873,57 +871,11 @@ async def retrieval():
             selected_values = request.form.getlist('cost_limit')
             print(selected_values)  
             print("retrieval endpoint")
-            # request_list = session.get("request_list")
-            # # request_list=ast.literal_eval(request_list)
-            # documents = []
-            # responses = []
-            # tasks = []
-            # print(len(request_list))
-            # for request_item in request_list:
-            #     tasks.append(process_request_item(request_item))
-            # responses = await asyncio.gather(*tasks)
-            # print("checks before printing the whole thing ")
-            # print(responses)
-
-            # # for response in responses:
-            # #         exemptions = response.get("exemptions", [])
-            # #         for exemption in exemptions:
-            # #             exemption["exemptions_length"] = len(exemptions)
-            # response_dict = responses
-            # # session["response_dict"]=response_dict
-            # print("duduudud")
-            # print(response_dict)
-            # print(type(response_dict))
-            # responses_json = json.dumps(response_dict)
-            redactions=["Section 21: Information accessible by other means",
-                        "Section 22: Information intended for future publication",
-                        "Section 23: Security bodies",
-                        "Section 24: National Security",
-                        "Section 26: Defence",
-                        "Section 27: International Relations",
-                        "Section 28: Realtions within the UK",
-                        "Section 29: The Economy",
-                        "Section 30 & 31: Law enforcement",
-                        "Section 32: Court Records",
-                        "Section 33: Public Audits",
-                        "Section 34: Parliamentary Privilege",
-                        "Section 35: Govenment Policy",
-                        "Section 36 - Prejudice to the effective conduct of public affairs",
-                        "Section 37 - Commumincation with His Majesty",
-                        "Section 38 - Health and Safety",
-                        "Section 39 - Environmental Information",
-                        "Section 40 - Personal Information",
-                        "Section 41 - Confidentiality",
-                        "Section 42 - Legal Professional Privilege",
-                        "Section 43 - Trade Secrets and Prejudice to commercial interests",
-                        "Section 44 - Prohibitions on Disclosure"]
-            dummy_var=[{'request': 'Cause of the fire and initial investigation findings.', 'response': 'The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more.', 'exemptions': {'Section 41 - confidentiality': 'Evidence: The exact sentence or content that needs to be redacted from the response is not present in the provided response chunk.'}}, {'request': 'Any prior safety concerns regarding the warehouse.', 'response': 'Our records indicate the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. Were there any indicators or prior safety concerns reported about this warehouse?', 'exemptions': {'Section 41 - confidentiality': 'Evidence: Could you please provide more details about the cause of the fire and the status of the investigation?'}}, {'request': 'Correspondence between [School Name] and the [Department Name].', 'response': "Email 1: From Dean to Head of Police Subject: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, I hope this message finds you in these trying times. I am reaching out concerning the devastating fire incident near our school, which tragically resulted in the loss of two young boys and a girl: Mark Owly, Edward Obri, and Helen Stars. Our community is deeply saddened, and we extend our heartfelt condolences to the families affected. Could you please provide more details about the cause of the fire and the status of the investigation? Sincerely, Dr. Emily Stanton Dean, Academy of Future Leaders Email 2: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Dr. Stanton, Thank you for your message and the expression of sympathy. The loss of these young lives is a profound tragedy. As our records the incident occured between 12:46am and 2:56am. The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more. Sincerely, Chief Mark Harrison London Metropolitan Police Email 3: From Dean to Head of Police Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, Thank you for the update. Were there any indicators or prior safety concerns reported about this warehouse? Our community is eager to understand how such a tragedy could occur. Best, Dr. Emily Stanton Email 4: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dr. Stanton, Document Prepared By: Office of the Chair, Bank of England Date: February 26, 2024 Date: June 26, 2023 To: Councillor Kathleen Houlton Kathleen.houlton@gmail.com Dear Councillor Kathleen Houlton, Thank you for your email and your concerns regarding the proposed alterations to the service road on the A580 in Lowton. We appreciate your dedication to the welfare of your constituents, and we are committed to addressing these concerns in a responsible and transparent manner. To provide you with the information you've requested, we are sharing the following details: 1. The proposed alterations to the service road are part of an ongoing development project aimed at improving traffic flow and enhancing road safety in the Lowton area. 2. Extensive studies and assessments have been conducted as part of the planning process. These studies include traffic impact assessments, environmental impact assessments, and safety evaluations. The project team has worked closely with relevant authorities and experts to ensure that the proposed alterations align with safety and environmental standards. 3. We are in the process of scheduling a public consultation, which will allow residents and stakeholders to provide input and express their concerns. The consultation is expected to take place in August 2023, and detailed information about the event will be shared with the community well in advance. 4. We have attached a summary of the key objectives and proposed changes for your reference. Please feel free to reach out to us if you require any further information or if you would like to be directly involved in the consultation process to represent the concerns of your constituents. We appreciate your proactive approach in engaging with this matter and look forward to working together to ensure that the alterations to the service road benefit the local community. Sincerely, Michelle Krown Wigan Council Attachment: Summary of Proposed Alterations and Objectives Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements. Your engagement and discretion in this matter is greatly appreciated.", 'exemptions': {'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.', 'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.'}}, {'request': 'Information regarding community involvement and relief efforts.', 'response': "Thank you for your school's compassion and involvement. We will coordinate with you on the logistics and inform you of any additional ways you can help. Regards, Chief Harrison. Please advise how our community can provide information that may assist in the investigation. We are committed to helping in any way we can. Thank you, Dr. Stanton. Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements.", 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}, {'request': "Details concerning His Majesty King Charles' notification and potential visit by Prince William and Princess Kate.", 'response': 'Dr. Stanton, Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter. Your engagement and discretion in this matter is greatly appreciated. Best regards, Chief Mark Harrison', 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}]
+            
             return render_template("retrieval.html")
         else:
             request_list = session.get("request_list")
-            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
-            # global request_list
-            # request_list=ast.literal_eval(request_list)
+            
             documents = []
             responses = []
             tasks = []
@@ -934,18 +886,14 @@ async def retrieval():
             print("checks before printing the whole thing ")
             print(responses)
 
-            # for response in responses:
-            #         exemptions = response.get("exemptions", [])
-            #         for exemption in exemptions:
-            #             exemption["exemptions_length"] = len(exemptions)
+           
             response_dict = responses
-            # session["response_dict"]=response_dict
+            
             print("duduudud")
             print(response_dict)
             print(type(response_dict))
            
             return jsonify(response_dict)
-            # return render_template("retrieval.html", responses_dict=session.get("response_dict"))
     else:
          return '''
         <script>
@@ -954,58 +902,12 @@ async def retrieval():
         </script>
         '''
 
-# @application.route("/retrieval", methods=["GET","POST"])
-# async def retrieval():
-#     global dummy_var
-#     if 'user' in session:
-#         if request.method =="POST":
-#             selected_values = request.form.getlist('cost_limit')
-            
-            
-#             redactions=["Section 21: Information accessible by other means",
-#                         "Section 22: Information intended for future publication",
-#                         "Section 23: Security bodies",
-#                         "Section 24: National Security",
-#                         "Section 26: Defence",
-#                         "Section 27: International Relations",
-#                         "Section 28: Realtions within the UK",
-#                         "Section 29: The Economy",
-#                         "Section 30 & 31: Law enforcement",
-#                         "Section 32: Court Records",
-#                         "Section 33: Public Audits",
-#                         "Section 34: Parliamentary Privilege",
-#                         "Section 35: Govenment Policy",
-#                         "Section 36 - Prejudice to the effective conduct of public affairs",
-#                         "Section 37 - Commumincation with His Majesty",
-#                         "Section 38 - Health and Safety",
-#                         "Section 39 - Environmental Information",
-#                         "Section 40 - Personal Information",
-#                         "Section 41 - Confidentiality",
-#                         "Section 42 - Legal Professional Privilege",
-#                         "Section 43 - Trade Secrets and Prejudice to commercial interests",
-#                         "Section 44 - Prohibitions on Disclosure"]
-            
-#             return render_template("retrieval.html")
-#         else:
-#             dummy_var=[{'request': 'Cause of the fire and initial investigation findings.', 'response': 'The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more.', 'exemptions': {'Section 41 - confidentiality': 'Evidence: The exact sentence or content that needs to be redacted from the response is not present in the provided response chunk.'}}, {'request': 'Any prior safety concerns regarding the warehouse.', 'response': 'Our records indicate the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. Were there any indicators or prior safety concerns reported about this warehouse?', 'exemptions': {'Section 41 - confidentiality': 'Evidence: Could you please provide more details about the cause of the fire and the status of the investigation?'}}, {'request': 'Correspondence between [School Name] and the [Department Name].', 'response': "Email 1: From Dean to Head of Police Subject: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, I hope this message finds you in these trying times. I am reaching out concerning the devastating fire incident near our school, which tragically resulted in the loss of two young boys and a girl: Mark Owly, Edward Obri, and Helen Stars. Our community is deeply saddened, and we extend our heartfelt condolences to the families affected. Could you please provide more details about the cause of the fire and the status of the investigation? Sincerely, Dr. Emily Stanton Dean, Academy of Future Leaders Email 2: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Dr. Stanton, Thank you for your message and the expression of sympathy. The loss of these young lives is a profound tragedy. As our records the incident occured between 12:46am and 2:56am. The investigation is ongoing, but initial findings suggest the fire originated in a warehouse. We are examining all aspects, including any possible safety protocol breaches. We will keep your community updated as we learn more. Sincerely, Chief Mark Harrison London Metropolitan Police Email 3: From Dean to Head of Police Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dear Chief Harrison, Thank you for the update. Were there any indicators or prior safety concerns reported about this warehouse? Our community is eager to understand how such a tragedy could occur. Best, Dr. Emily Stanton Email 4: From Head of Police to Dean Subject: Re: Urgent Inquiry and Condolences Regarding Fire Incident Dr. Stanton, Document Prepared By: Office of the Chair, Bank of England Date: February 26, 2024 Date: June 26, 2023 To: Councillor Kathleen Houlton Kathleen.houlton@gmail.com Dear Councillor Kathleen Houlton, Thank you for your email and your concerns regarding the proposed alterations to the service road on the A580 in Lowton. We appreciate your dedication to the welfare of your constituents, and we are committed to addressing these concerns in a responsible and transparent manner. To provide you with the information you've requested, we are sharing the following details: 1. The proposed alterations to the service road are part of an ongoing development project aimed at improving traffic flow and enhancing road safety in the Lowton area. 2. Extensive studies and assessments have been conducted as part of the planning process. These studies include traffic impact assessments, environmental impact assessments, and safety evaluations. The project team has worked closely with relevant authorities and experts to ensure that the proposed alterations align with safety and environmental standards. 3. We are in the process of scheduling a public consultation, which will allow residents and stakeholders to provide input and express their concerns. The consultation is expected to take place in August 2023, and detailed information about the event will be shared with the community well in advance. 4. We have attached a summary of the key objectives and proposed changes for your reference. Please feel free to reach out to us if you require any further information or if you would like to be directly involved in the consultation process to represent the concerns of your constituents. We appreciate your proactive approach in engaging with this matter and look forward to working together to ensure that the alterations to the service road benefit the local community. Sincerely, Michelle Krown Wigan Council Attachment: Summary of Proposed Alterations and Objectives Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements. Your engagement and discretion in this matter is greatly appreciated.", 'exemptions': {'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.', 'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.'}}, {'request': 'Information regarding community involvement and relief efforts.', 'response': "Thank you for your school's compassion and involvement. We will coordinate with you on the logistics and inform you of any additional ways you can help. Regards, Chief Harrison. Please advise how our community can provide information that may assist in the investigation. We are committed to helping in any way we can. Thank you, Dr. Stanton. Community members can contact our department directly with any information. We will also send officers to the school to gather any relevant insights or statements.", 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}, {'request': "Details concerning His Majesty King Charles' notification and potential visit by Prince William and Princess Kate.", 'response': 'Dr. Stanton, Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter. Your engagement and discretion in this matter is greatly appreciated. Best regards, Chief Mark Harrison', 'exemptions': {'Section 37 - comms with His Majesty': 'Evidence: Just to let you know, His Majesty King Charles has been notified of the incident. He told us that he spoke with his son Prince William and the prince and princess Kate may want to visit the memorial of the 3 young students sometime in March next year. They are all very sorry for this tragic accident and feel deeply involved in the matter.', 'Section 41 - confidentiality': 'Evidence: Your engagement and discretion in this matter is greatly appreciated.'}}]
-#             return jsonify(dummy_var)
-#             # return render_template("retrieval.html", responses_dict=session.get("response_dict"))
-#     else:
-#          return '''
-#         <script>
-#             alert('Sorry but you need to login to work with FOI');
-#             window.location = '/login';  
-#         </script>
-#         '''
-
 @application.route("/response", methods=["GET","POST"])
 async def response():
-        global final
+    global final
 
-    # if 'user' in session:
+    if 'user' in session:
         if request.method =="POST":
-            # global request_list, foi
-            # responses=request.form.get("responses")
             request_list=session.get("request_list")
             data=request.get_json()
 
@@ -1014,14 +916,11 @@ async def response():
             final=extracted_data
             print("printinf data")
             print(extracted_data)
-            # print(data)
+            
             
             return jsonify({"message":"successss"})
         else:
             foi_request=session.get("foi_request")
-            # request_list = session.get("request_list")
-            # request_list=['What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets?', 'How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated.', 'What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years?', 'Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions?', 'What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact?']
-
             valid_dict = session.get("valid_dict")
             vex_dict = session.get("vexatious_flag")
             repeated_dict = session.get("repeated_dict")
@@ -1030,33 +929,18 @@ async def response():
             acknowledgment_text = await generate_acknowledgement_letter(request_list, valid_dict, vex_dict, repeated_dict)
             print("acknowledement letter")
             print(acknowledgment_text)
-#             foi='''Dear North Somerset Council, 
- 
-# Under the Freedom of Information Act 2000, I am writing to request information about the council's environmental initiatives and sustainability efforts. Specifically, I am interested in understanding the council's strategies and actions in promoting environmental sustainability within the local area. Please provide information on the following: 
- 
-# * What is the current sustainability strategy adopted by the council for the years [specific years, e.g., 2023-2028], and how does it align with national environmental goals and targets? 
-# * How much budget has been allocated towards the maintenance and development of green spaces within the council area for the current financial year? Please include details of any new green space projects initiated. 
-# * What are the current waste management and recycling rates within the council area, and what initiatives have been implemented to improve these rates over the past five years? 
-# *  Can you provide details of any renewable energy projects the council has initiated or participated in, including the types of renewable energy used and the projected or achieved reduction in carbon emissions? 
-# * What programs or initiatives does the council have in place to engage the public in environmental sustainability efforts and to educate residents about reducing their environmental impact? 
-# I understand that under the Act, I should be entitled to a response within 20 working days of your receipt of this request. If my request cannot be met within this time frame, please inform me of the anticipated delay. 
- 
-# Thank you for your assistance. 
-# Sincerely, 
-# Rodolfo Boni '''
-            # response_dict=session.get("response_dict")
-            # print(response_dict)
+
             
             response_letter=await generate_response_letter(foi_request, final)
 
             return render_template("response.html", response=response_letter, acknowledgment_text=acknowledgment_text)
-    # else:
-    #      return '''
-    #     <script>
-    #         alert('Sorry but you need to login to work with FOI');
-    #         window.location = '/login';  
-    #     </script>
-    #     '''
+    else:
+         return '''
+        <script>
+            alert('Sorry but you need to login to work with FOI');
+            window.location = '/login';  
+        </script>
+        '''
 
 
 @application.route("/refusal", methods=["POST", "GET"])
