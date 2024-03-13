@@ -20,11 +20,11 @@ from flask import g
 from flask import jsonify
 from langchain_community.vectorstores.pgvector import PGVector
 from langchain_openai.embeddings import AzureOpenAIEmbeddings
-
+load_dotenv('myenv/.env')
 application.secret_key='32qwe34ds'
 
 
-load_dotenv('myenv/.env')
+
 
 application.config['SESSION_TYPE'] = 'filesystem'
 application.config['SESSION_PERMANENT'] = False
@@ -601,20 +601,20 @@ def login_page():
 async def index():
     if 'user' in session:
         if request.method == "POST":
-            if session.get("foi_request"):
-                session.pop("foi_request")
-            if session.get("email_id"):
-                session.pop("email_id")
-            if session.get("request_list"):
-                session.pop("request_list")
-            if session.get("valid_dict"):
-                session.pop("valid_dict")
-            if session.get("vexatious_flag"):
-                session.pop("vexatious_flag")
-            if session.get("repeated_dict"):
-                session.pop("repeated_dict")
-            if session.get("valid_flag"):
-                session.pop("valid_flag")
+            # if session.get("foi_request"):
+            #     session.pop("foi_request")
+            # if session.get("email_id"):
+            #     session.pop("email_id")
+            # if session.get("request_list"):
+            #     session.pop("request_list")
+            # if session.get("valid_dict"):
+            #     session.pop("valid_dict")
+            # if session.get("vexatious_flag"):
+            #     session.pop("vexatious_flag")
+            # if session.get("repeated_dict"):
+            #     session.pop("repeated_dict")
+            # if session.get("valid_flag"):
+            #     session.pop("valid_flag")
 
 
             input_text = request.form.get("input_text")
@@ -650,8 +650,6 @@ async def full_name():
      if 'user' in session:
         if request.method == "POST":
             input_text = request.form.get("input_text")
-            email_id = request.form.get("email_id")
-            timestamp = request.form.get("timestamp")
             full_name=await check_full_name(input_text)
             return jsonify({'full_name': full_name})
         else:
@@ -669,8 +667,7 @@ async def vex():
      if 'user' in session:
         if request.method == "POST":
             input_text = request.form.get("input_text")
-            email_id = request.form.get("email_id")
-            timestamp = request.form.get("timestamp")
+        
 
             vexatious= await check_for_vexatious(input_text)
             return jsonify({'vex': vexatious})
@@ -795,6 +792,8 @@ async def check_repeated():
             gpt_repeated_dict = await check_for_repeated(previous_requests, session.get("request_list"))
             repeated_dict=parse_terminal_dict(gpt_repeated_dict)
             repeated_dict = ast.literal_eval(repeated_dict)
+            session.pop("timestamp", None)
+            session.pop("email_id", None)
             repeated_flag = {key: 0 if value.startswith("Repeated") else 1 for key, value in repeated_dict.items()}
             session["repeated_dict"] = repeated_dict
 
@@ -932,6 +931,14 @@ async def response():
 
             
             response_letter=await generate_response_letter(foi_request, final)
+            session.pop("foi_request", None)
+            session.pop("valid_dict", None)
+            session.pop("vexatious_flag", None)
+            session.pop("repeated_dict", None)
+            session.pop("request_list", None)
+            session.pop("valid_flag", None)
+
+
 
             return render_template("response.html", response=response_letter, acknowledgment_text=acknowledgment_text)
     else:
