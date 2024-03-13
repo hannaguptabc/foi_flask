@@ -601,20 +601,12 @@ def login_page():
 async def index():
     if 'user' in session:
         if request.method == "POST":
-            # if session.get("foi_request"):
-            #     session.pop("foi_request")
-            # if session.get("email_id"):
-            #     session.pop("email_id")
-            # if session.get("request_list"):
-            #     session.pop("request_list")
-            # if session.get("valid_dict"):
-            #     session.pop("valid_dict")
-            # if session.get("vexatious_flag"):
-            #     session.pop("vexatious_flag")
-            # if session.get("repeated_dict"):
-            #     session.pop("repeated_dict")
-            # if session.get("valid_flag"):
-            #     session.pop("valid_flag")
+            session.pop("foi_request", None)
+            session.pop("valid_dict", None)
+            session.pop("vexatious_flag", None)
+            session.pop("repeated_dict", None)
+            session.pop("request_list", None)
+            session.pop("valid_flag", None)
 
 
             input_text = request.form.get("input_text")
@@ -931,12 +923,7 @@ async def response():
 
             
             response_letter=await generate_response_letter(foi_request, final)
-            session.pop("foi_request", None)
-            session.pop("valid_dict", None)
-            session.pop("vexatious_flag", None)
-            session.pop("repeated_dict", None)
-            session.pop("request_list", None)
-            session.pop("valid_flag", None)
+            
 
 
 
