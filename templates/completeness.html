@@ -251,30 +251,38 @@
                 <tr>
                     <th>Component</th>
                     <th>Completeness</th>
-                    <th>Does this request exceed the statutory cost limit? If yes, enter the amount</th> <!-- New column header -->
+                    <th>Does this request exceed the statutory cost limit? If yes, enter the amount</th>
+                    <th>Does the council hold the information?</th> <!-- New column header -->
                     <th>Redirect to this department for more Information!</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Loop through components and results -->
                 {% for component, result in complete_dict.items() %}
                     <tr>
                         <td style="text-align: center;">{{ component }}</td>
                         <td style="text-align: center;">{{ result }}</td>
                         
+                        <!-- Existing cost limit dropdown -->
                         <td style="text-align: center;">
-                            
-                            <select name="cost_limit{{ loop.index }}"  class="cost-limit-dropdown">
+                            <select name="cost_limit{{ loop.index }}" class="cost-limit-dropdown">
                                 <option value="No" selected>No</option>
                                 <option value="Yes">Yes</option>
                             </select>
-                        </form>
                         </td>
-                        <td style="text-align: center;">
 
+                        <!-- New dropdown for council information -->
+                        <td style="text-align: center;">
+                            <select name="council_info{{ loop.index }}" class="council-info-dropdown">
+                                <option value="No" selected>No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </td>
+                        
+                        <td style="text-align: center;">
                             {% if result == "100%" %}
                                 <p>-</p>
                             {% else %}
-                            <!-- <span class="department-name" data-index="{{ loop.index0 }}">{{ department_list[loop.index0] }}</span> -->
                                 <select name="department{{ loop.index }}" class="department-dropdown" style="width: 240px;">
                                     <option value="-" selected="{{department_list[loop.index0]}}">Select Department</option>
                                     {% for service in services %}
@@ -287,9 +295,7 @@
                                 </select>
                                 <button class="send-btn">Send Request</button>
                             {% endif %}
-
-                            
-                        </td> <!-- New column with input text box -->
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -301,6 +307,7 @@
                 </form>
                 <form id="nextForm" action="/retrieval" method="post" id="completeness-form">
                     <input type="hidden" name="cost_limit">
+                    <input type="hidden" name="council_info">
                     <button type="submit" class="button">Next</button>
                 </form>
             </div>
@@ -386,26 +393,52 @@
     
 
 // Iterate over each dropdown
-    costLimitDropdowns.forEach(function(dropdown, index) {
+    costLimitDropdowns.forEach(function(dropdown) {
         dropdown.addEventListener('change', function() {
             // Get the selected value
             const selectedValue = this.value;
 
             // Set the value of the hidden input field
-            const allValues = []
-            for(let i = 0;i<costLimitDropdowns.length;++i){
-                const hiddenInput = document.querySelector(`input[name="cost_limit${i}"]`);
-                allValues.push(hiddenInput)
-            }
-            console.log(allValues);
-            hiddenInput.value = JSON.stringify(allValues);
-        });
-    });
-    costLimitDropdowns.forEach(function(dropdown) {
-        dropdown.addEventListener('change', function() {
+            const allValues = [];
+            costLimitDropdowns.forEach(function(dropdown) {
+                allValues.push(dropdown.value); // Store the selected value of each dropdown
+            });
+            hiddenInput.value = JSON.stringify(allValues); // Convert the array to JSON string and set it as the value of the hidden input field
+
+            // Submit the form
             form.submit();
         });
     });
+
+    const councilInfoDropdowns = document.querySelectorAll('.council-info-dropdown');
+
+    // Iterate over each dropdown
+    const selectedCouncilInfoValues = [];
+    councilInfoDropdowns.forEach(function(dropdown) {
+        const selectedValue = dropdown.value;
+        selectedCouncilInfoValues.push(selectedValue);
+    });
+    // Convert the array to JSON string and set it as the value of the hidden input field
+    const hiddenCouncilInfoInput = document.querySelector('input[name="council_info"]');
+    hiddenCouncilInfoInput.value = JSON.stringify(selectedCouncilInfoValues);
+
+    // Event listener for council info dropdown change
+    councilInfoDropdowns.forEach(function(dropdown) {
+    dropdown.addEventListener('change', function() {
+        // Get the selected value
+        const selectedValue = this.value;
+
+        // Set the value of the hidden input field
+        const allValues = [];
+        councilInfoDropdowns.forEach(function(dropdown) {
+            allValues.push(dropdown.value); // Store the selected value of each dropdown
+        });
+        hiddenCouncilInfoInput.value = JSON.stringify(allValues); // Convert the array to JSON string and set it as the value of the hidden input field
+
+        // Submit the form
+        form.submit();
+    });
+});
     </script>
 </body>
 </html>

@@ -15,18 +15,23 @@
 
         .container {
             display: flex;
-            justify-content: space-between; /* Align items side by side */
-            margin-top: 20px; /* Add margin between containers */
+            flex-wrap: wrap; /* Allow containers to wrap */
+            justify-content: center; /* Center align items horizontally */
+            margin-top: 100px; /* Adjust margin to make space for the header */
         }
 
         .response-container, .acknowledgment-container {
-            width: calc(50% - 20px); /* Each container takes up half the width with some margin */
+            flex: 0 0 calc(50% - 20px);
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
             margin-bottom: 20px;
+            width: calc(50% - 40px); /* Adjust width to ensure two containers fit in a row */
+            max-width: 600px; /* Limit maximum width of containers */
+            margin-right: 20px; /* Add margin between containers */
+            margin-left: 20px; /* Add margin between containers */
         }
 
         .custom-textarea {
@@ -97,19 +102,19 @@
             background-color: #004080;
         }
 
-.header {
-        padding: 1.25rem 2rem;
-        /* background-color: #0d74ce; */
-        background-color: white;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-      }
+        .header {
+    padding: 1.25rem 2rem;
+    background-color: white; /* Set background color */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+    position: fixed; /* Change position to fixed */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure the header is on top */
+}
 
       .client-details {
         color: white;
@@ -198,19 +203,7 @@
             line-height: 1.6;
         } 
 
-        .header {
-        padding: 1.25rem 2rem;
-        /* background-color: #0d74ce; */
-        background-color: white;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-      }
+        
 
       .client-details {
         color: white;
@@ -253,21 +246,9 @@
             margin: 0 auto;
         }
 
-        .container {
-            display: flex;
-            justify-content: space-between; /* Align items side by side */
-            margin-top: 20px; /* Add margin between containers */
-        }
+        
 
-        .response-container, .acknowledgment-container {
-            flex: 0 0 calc(50% - 20px); /* Each container takes up half the width with some margin */
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        
         .input-container label {
             display: block;
             margin-bottom: 10px;

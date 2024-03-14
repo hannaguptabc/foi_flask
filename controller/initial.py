@@ -9,6 +9,7 @@ import datetime
 from openai import AzureOpenAI
 import os
 import uuid
+import logging
 
 from dotenv import load_dotenv
 import bcrypt
@@ -18,24 +19,28 @@ import fitz
 import json
 from flask import g
 from flask import jsonify
+from flask import Flask
+from flask_caching import Cache
 from langchain_community.vectorstores.pgvector import PGVector
 from langchain_openai.embeddings import AzureOpenAIEmbeddings
 load_dotenv('myenv/.env')
 application.secret_key='32qwe34ds'
 
+cache= Cache(application)
 
-
-
+application.config['CACHE_TYPE'] = 'simple'  # Use a simple in-memory cache for demonstration purposes
+application.config['CACHE_DEFAULT_TIMEOUT'] = 300 
 application.config['SESSION_TYPE'] = 'filesystem'
 application.config['SESSION_PERMANENT'] = False
 application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=120)
 application.config['SESSION_USE_SIGNER'] = True
+
 client=AzureOpenAI(api_key = os.getenv("openai_api_key"),
                    api_version="2023-09-01-preview",
                    azure_endpoint=os.getenv("openai_api_base"))
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
+logging.basicConfig(level=logging.DEBUG)
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
     driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
     host=os.environ.get("PGHOST"),
@@ -426,7 +431,41 @@ Now you need to frame the letter in such a way that you mention all the parts an
 
 
 async def generate_response_letter(request, responses_json):
-    response_template=read_pdf_mupdf('static/FOI Response - Format.pdf')
+    response_template='''Dear [Requester's Name], 
+
+Thank you for your request for information under the Freedom of Information Act 2000.  
+
+If exemptions have been applied, we have provided a rationale and details of the exemption. 
+
+Please find below the details of your request alongside a response.  
+
+Question #1 
+
+Response #1 (if exemptions or redactions have been applied, provide a brief description) 
+
+Question #2 
+
+Response #2 (if exemptions or redactions have been applied, provide a brief description) 
+
+Question #3 
+
+Response #3 (if exemptions or redactions have been applied, provide a brief description) 
+
+*** Continues depending on the number of identified questions **** 
+
+ 
+
+Should you have any further queries, please re-submit a formal Freedom of Information request through the following front door ***email address of Council’s front door**** 
+
+ 
+
+Yours sincerely,  
+
+*** name of council worker*** 
+
+*** work title of council worker*** 
+
+*** name of council *** '''
 
 
     content=f'''You have to act as an Freedom of Information request responder and generate a response letter to a request based on a template and also assess if there are any exemptions present.
@@ -551,22 +590,33 @@ def extract_json_from_braces(text):
     return json_string
 
 
-async def process_request_item(request_item):
-    
-    docs =await vectorstore.asimilarity_search_with_score(request_item)
-    print("*************")
-    print(docs)
-    extracted_documents = {}
-    for doc, score in docs:
-        page_content = doc.page_content
-        redactions = doc.metadata.get('redactions', {})
-        extracted_documents[page_content] = redactions
-    response = await get_response(request_item, extracted_documents)
-    print("response")
-    print(response)
-    response = extract_json_from_braces(response)
-    response = ast.literal_eval(response)
-    return response
+async def process_request_item(request_item, cost):
+    if cost.lower()=="no":
+        docs =await vectorstore.asimilarity_search_with_score(request_item)
+        print("*************")
+        print(docs)
+        extracted_documents = {}
+        for doc, score in docs:
+            page_content = doc.page_content
+            redactions = doc.metadata.get('redactions', {})
+            extracted_documents[page_content] = redactions
+        response = await get_response(request_item, extracted_documents)
+        print("response")
+        print(response)
+        response = extract_json_from_braces(response)
+        response = ast.literal_eval(response)
+        return response
+    else:
+        response={
+            "request":request_item,
+            "response":"We refuse to answer this request  under Section 12 of FOIA as it exceeds statuary cost limit.",
+            "exemptions":{}
+
+
+        }
+        return response
+        
+        
 async def process_requests(request_list):
     print(len(request_list))
     print(type(request_list))
@@ -589,7 +639,7 @@ def login_page():
         password = request.form.get("password")
         user = get_user_by_username(username)
         if user is None or not verify_password(password, user.hashed_password):
-        
+            logging.debug("Invalid username or password")
             return 'hello' # Redirect to dashboard page after successful login
         else:
             session["user"]=username
@@ -613,11 +663,9 @@ async def index():
             
             email_id = request.form.get("email_id")
             timestamp = request.form.get("timestamp")
-            print("lets goooo")
-            print(input_text)
-            print(email_id)
-            
+            logging.debug("Received input_text: %s, email_id: %s, timestamp: %s", input_text, email_id, timestamp)
             full_name=await check_full_name(input_text)
+            logging.debug("Full name: %s", full_name)
             print("fuction")
             session["foi_request"]=input_text
             session["email_id"]=email_id
@@ -628,6 +676,7 @@ async def index():
         else:
             return render_template('index.html')
     else:
+        logging.debug("User is not logged in")
         return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
@@ -643,10 +692,12 @@ async def full_name():
         if request.method == "POST":
             input_text = request.form.get("input_text")
             full_name=await check_full_name(input_text)
+            logging.debug("Full name: %s", full_name)
             return jsonify({'full_name': full_name})
         else:
             return render_template('index.html')
      else:
+        logging.debug("User is not logged in")
         return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
@@ -659,13 +710,13 @@ async def vex():
      if 'user' in session:
         if request.method == "POST":
             input_text = request.form.get("input_text")
-        
-
             vexatious= await check_for_vexatious(input_text)
+            logging.debug("Vexatious: %s", vexatious)
             return jsonify({'vex': vexatious})
         else:
             return render_template('index.html')
      else:
+        logging.debug("User is not logged in")
         return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
@@ -675,27 +726,21 @@ async def vex():
 
 
 @application.route("/identify_parts", methods=["GET","POST"])
+@cache.cached(timeout=60)
 async def identify_parts():
      result_list=None
      if 'user' in session:
-            
-            
-            print("trying")
+            logging.debug("User is logged in")
             foi_request=session.get("foi_request")
-
-            print("hhhhhh")
-            print(foi_request)
-            
-            # result_list =await identify_part(foi_request)
+            logging.debug("FOI Request: %s", foi_request)
             result_list =await identify_part(foi_request)
-            print(result_list)
-            print(type(result_list))
+            logging.debug("Result List: %s", result_list)
             result_list=safe_literal_eval(result_list)
-            print(result_list)
             session["request_list"]=result_list
             return render_template("identify_parts.html", result=result_list)
             
      else:
+         logging.debug("User is not logged in")
          return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
@@ -704,6 +749,7 @@ async def identify_parts():
         '''
         
 @application.route("/vexatious", methods=["GET","POST"])
+@cache.cached(timeout=60)
 async def vexatious():
     if 'user' in session:
         if request.method =="POST":            
@@ -738,6 +784,7 @@ async def vexatious():
         
 
 @application.route("/validate", methods=["GET","POST"])
+@cache.cached(timeout=60)
 async def validation():
     if 'user' in session:
         if request.method =="POST":
@@ -763,6 +810,7 @@ async def validation():
 
 
 @application.route("/check_repeated", methods=["GET","POST"])
+@cache.cached(timeout=60)
 async def check_repeated():
     if 'user' in session:
         
@@ -801,6 +849,24 @@ async def check_repeated():
         '''
 @application.route("/completeness_check", methods=["GET","POST"])
 async def check_completeness():
+    services = [
+            "Adult Services",
+            "Children's Services",
+            "Education Services",
+            "Environmental Services",
+            "Housing",
+            "Planning and Development",
+            "Transport and Highways",
+            "Public Health",
+            "Leisure and Culture",
+            "Finance and Resources",
+            "Human Resources",
+            "Legal Services",
+            "Regulatory Services",
+            "Community Services",
+            "Information Technology",
+            "Customer Services"
+        ]
     if request.method =="POST":
         department_list=[]
         
@@ -825,54 +891,49 @@ async def check_completeness():
                 print(f"The value for key '{key}' is not in string format or doesn't contain '%' sign.")
         
 
-        services = [
-            "Adult Services",
-            "Children's Services",
-            "Education Services",
-            "Environmental Services",
-            "Housing",
-            "Planning and Development",
-            "Transport and Highways",
-            "Public Health",
-            "Leisure and Culture",
-            "Finance and Resources",
-            "Human Resources",
-            "Legal Services",
-            "Regulatory Services",
-            "Community Services",
-            "Information Technology",
-            "Customer Services"
-        ]
+        
         print(complete_dict)
         print("^^^^^^^^^^^^^^^")
         print(department_list)
+        session["complete_dict"]=complete_dict
+        session["department_list"]=department_list
         
         return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
     else:
-        return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
+        return render_template("completeness.html", complete_dict=session.get("complete_dict"), department_list=session.get("department_list"), services=services)
                 
     
 
 @application.route("/retrieval", methods=["GET","POST"])
+@cache.cached(timeout=3600)
 async def retrieval():
     if 'user' in session:
         if request.method =="POST":
+            session.pop("complete_dict", None)
+            session.pop("department_list", None)
             session.pop("timestamp", None)
             session.pop("email_id", None)
-            selected_values = request.form.getlist('cost_limit')
-            print(selected_values)  
+            selected_values_json = request.form.get('cost_limit')
+            cost_limit_values=json.loads(selected_values_json)
+            session["cost_limit"]=cost_limit_values
+            
+            print(cost_limit_values)
+            selected_values_2 = request.form.get('council_info')
+            council_info=json.loads(selected_values_2)
             print("retrieval endpoint")
+            print(council_info) 
             
             return render_template("retrieval.html")
         else:
             request_list = session.get("request_list")
+            cost_limit=session.get("cost_limit")
             
-            documents = []
+            
             responses = []
             tasks = []
             print(len(request_list))
-            for request_item in request_list:
-                tasks.append(process_request_item(request_item))
+            for request_item, cost_limit_value in zip(request_list, cost_limit):
+                tasks.append(process_request_item(request_item, cost_limit_value))
             responses = await asyncio.gather(*tasks)
             print("checks before printing the whole thing ")
             print(responses)
@@ -883,6 +944,7 @@ async def retrieval():
             print("duduudud")
             print(response_dict)
             print(type(response_dict))
+            session.pop("cost_limit", None)
            
             return jsonify(response_dict)
     else:
@@ -963,8 +1025,7 @@ def save_document():
     return send_file(
         doc_buffer,
         mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        as_attachment=True,
-        attachment_filename=filename
+        as_attachment=True  # This automatically sets the filename for download
     )
 
 @application.route("/logout")
