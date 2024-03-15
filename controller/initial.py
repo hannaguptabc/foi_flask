@@ -20,16 +20,19 @@ import json
 from flask import g
 from flask import jsonify
 from flask import Flask
-from flask_caching import Cache
 from langchain_community.vectorstores.pgvector import PGVector
 from langchain_openai.embeddings import AzureOpenAIEmbeddings
+from logging.handlers import RotatingFileHandler
 load_dotenv('myenv/.env')
 application.secret_key='32qwe34ds'
 
-cache= Cache(application)
-
-application.config['CACHE_TYPE'] = 'simple'  # Use a simple in-memory cache for demonstration purposes
-application.config['CACHE_DEFAULT_TIMEOUT'] = 300 
+log_file = 'app.log'
+file_handler = RotatingFileHandler(log_file, maxBytes=1024*1024, backupCount=10)
+# Set the formatter
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+# application.config['CACHE_TYPE'] = 'simple'  # Use a simple in-memory cache for demonstration purposes
+# application.config['CACHE_DEFAULT_TIMEOUT'] = 300 
 application.config['SESSION_TYPE'] = 'filesystem'
 application.config['SESSION_PERMANENT'] = False
 application.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=120)
@@ -41,6 +44,9 @@ client=AzureOpenAI(api_key = os.getenv("openai_api_key"),
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 logging.basicConfig(level=logging.DEBUG)
+logging.getLogger().addHandler(file_handler)
+# Set the logging level
+logging.getLogger().setLevel(logging.INFO)
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
     driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
     host=os.environ.get("PGHOST"),
@@ -591,8 +597,8 @@ def extract_json_from_braces(text):
 
 
 async def process_request_item(request_item, cost):
-    if cost.lower()=="no":
-        docs =await vectorstore.asimilarity_search_with_score(request_item)
+    if cost is not None and cost.lower() == "no":
+        docs = await vectorstore.asimilarity_search_with_score(request_item)
         print("*************")
         print(docs)
         extracted_documents = {}
@@ -606,16 +612,30 @@ async def process_request_item(request_item, cost):
         response = extract_json_from_braces(response)
         response = ast.literal_eval(response)
         return response
+    elif cost is None:
+        docs = await vectorstore.asimilarity_search_with_score(request_item)
+        print("*************")
+        print(docs)
+        extracted_documents = {}
+        for doc, score in docs:
+            page_content = doc.page_content
+            redactions = doc.metadata.get('redactions', {})
+            extracted_documents[page_content] = redactions
+        response = await get_response(request_item, extracted_documents)
+        print("response")
+        print(response)
+        response = extract_json_from_braces(response)
+        response = ast.literal_eval(response)
+        return response
+    
+
     else:
-        response={
-            "request":request_item,
-            "response":"We refuse to answer this request  under Section 12 of FOIA as it exceeds statuary cost limit.",
-            "exemptions":{}
-
-
+        response = {
+            "request": request_item,
+            "response": "We refuse to answer this request  under Section 12 of FOIA as it exceeds statuary cost limit.",
+            "exemptions": {}
         }
         return response
-        
         
 async def process_requests(request_list):
     print(len(request_list))
@@ -726,7 +746,6 @@ async def vex():
 
 
 @application.route("/identify_parts", methods=["GET","POST"])
-@cache.cached(timeout=60)
 async def identify_parts():
      result_list=None
      if 'user' in session:
@@ -749,59 +768,59 @@ async def identify_parts():
         '''
         
 @application.route("/vexatious", methods=["GET","POST"])
-@cache.cached(timeout=60)
 async def vexatious():
     if 'user' in session:
-        if request.method =="POST":            
-            request_list=session.get("request_list")
-           
-            print(request_list)
+        if request.method =="POST":
+            try:
+                request_list=session.get("request_list")
+                logging.debug("Request list: %s", request_list)
 
-            gpt_vexatious_dict =await check_for_vexatious(request_list)
-            vexatious_dict=parse_terminal_dict(gpt_vexatious_dict)
-            vexatious_dict=ast.literal_eval(vexatious_dict)
-            print(vexatious_dict)
-            
-            vexatious_flag={key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
-            session["vexatious_flag"]=vexatious_flag
-            vex = any(value == 0 for value in vexatious_flag.values())
-            refusal = None
-            if vex:
-                foi_request=session.get("foi_request")
-                reason="it is a vexaious request"
-                refusal=await refusal_notice(reason, foi_request)
-            return render_template("vexatious.html", vexatious_dict=vexatious_dict, refusal=refusal)
+                gpt_vexatious_dict = await check_for_vexatious(request_list)
+                vexatious_dict = parse_terminal_dict(gpt_vexatious_dict)
+                vexatious_dict = ast.literal_eval(vexatious_dict)
+                logging.debug("Vexatious dict: %s", vexatious_dict)
+
+                vexatious_flag = {key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
+                session["vexatious_flag"] = vexatious_flag
+                vex = any(value == 0 for value in vexatious_flag.values())
+                refusal = None
+                if vex:
+                    foi_request = session.get("foi_request")
+                    reason = "it is a vexatious request"
+                    refusal = await refusal_notice(reason, foi_request)
+                return render_template("vexatious.html", vexatious_dict=vexatious_dict, refusal=refusal)
+            except Exception as e:
+                logging.error("An error occurred in /vexatious endpoint: %s", e)
+                return "An error occurred, please try again later."
         else:
             return render_template("vexatious.html", vexatious_dict=vexatious_dict)
     else:
-         return '''
+        return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
             window.location = '/login';  
         </script>
         '''
-  
         
 
 @application.route("/validate", methods=["GET","POST"])
-@cache.cached(timeout=60)
 async def validation():
     if 'user' in session:
         if request.method =="POST":
-
-            request_list=session.get("request_list")
-            
-
-            validation_result =await validation_of_request(request_list)
-            validation_result=parse_terminal_dict(validation_result)
-            validation_dict = ast.literal_eval(validation_result)
-            session["valid_dict"]=validation_dict
-
-            return render_template("validation.html", validation_dict=validation_dict, vexatious_flag=session.get("vexatious_flag"))
+            try:
+                request_list=session.get("request_list")
+                validation_result = await validation_of_request(request_list)
+                validation_result = parse_terminal_dict(validation_result)
+                validation_dict = ast.literal_eval(validation_result)
+                session["valid_dict"] = validation_dict
+                return render_template("validation.html", validation_dict=validation_dict, vexatious_flag=session.get("vexatious_flag"))
+            except Exception as e:
+                logging.error("An error occurred in /validate endpoint: %s", e)
+                return "An error occurred, please try again later."
         else:
             return render_template("validation.html", validation_dict=validation_dict)
     else:
-         return '''
+        return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
             window.location = '/login';  
@@ -810,43 +829,41 @@ async def validation():
 
 
 @application.route("/check_repeated", methods=["GET","POST"])
-@cache.cached(timeout=60)
 async def check_repeated():
     if 'user' in session:
-        
         if request.method =="POST":
+            try:
+                email = session.get("email_id")
+                latest_timestamp = session.get("timestamp")
+                valid_dict = session.get("valid_dict")
+                valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
+                session["valid_flag"] = valid_flag
 
-            email = session.get("email_id")
-            
-            latest_timestamp = session.get("timestamp")
+                previous_requests = get_requests_by_email(email, latest_timestamp)
+                gpt_repeated_dict = await check_for_repeated(previous_requests, session.get("request_list"))
+                repeated_dict = parse_terminal_dict(gpt_repeated_dict)
+                repeated_dict = ast.literal_eval(repeated_dict)
+                session.pop("timestamp", None)
+                session.pop("email_id", None)
+                repeated_flag = {key: 0 if value.startswith("Repeated") else 1 for key, value in repeated_dict.items()}
+                session["repeated_dict"] = repeated_dict
 
-            valid_dict=session.get("valid_dict")
-            valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
-            session["valid_flag"]=valid_flag
-            print(valid_flag)
-            print(type(valid_flag))
-            print("in repeated ")
-
-            
-            previous_requests = get_requests_by_email(email, latest_timestamp)
-            gpt_repeated_dict = await check_for_repeated(previous_requests, session.get("request_list"))
-            repeated_dict=parse_terminal_dict(gpt_repeated_dict)
-            repeated_dict = ast.literal_eval(repeated_dict)
-            session.pop("timestamp", None)
-            session.pop("email_id", None)
-            repeated_flag = {key: 0 if value.startswith("Repeated") else 1 for key, value in repeated_dict.items()}
-            session["repeated_dict"] = repeated_dict
-
-            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag,vexatious_flags=session.get("vexatious_flag"))
+                return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag, vexatious_flags=session.get("vexatious_flag"))
+            except Exception as e:
+                logging.error("An error occurred in /check_repeated endpoint: %s", e)
+                return "An error occurred, please try again later."
         else:
             return render_template("check_repeated.html", repeated_dict=session.get("repeated_dict"), valid_flag=session.get("valid_flag"), vexatious_flags=session.get("vexatious_flag"))
     else:
-         return '''
+        return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
             window.location = '/login';  
         </script>
         '''
+    
+
+
 @application.route("/completeness_check", methods=["GET","POST"])
 async def check_completeness():
     services = [
@@ -901,59 +918,58 @@ async def check_completeness():
         return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
     else:
         return render_template("completeness.html", complete_dict=session.get("complete_dict"), department_list=session.get("department_list"), services=services)
-                
-    
 
-@application.route("/retrieval", methods=["GET","POST"])
-@cache.cached(timeout=3600)
+@application.route("/retrieval", methods=["GET", "POST"])
 async def retrieval():
     if 'user' in session:
-        if request.method =="POST":
+        if request.method == "POST":
             session.pop("complete_dict", None)
             session.pop("department_list", None)
             session.pop("timestamp", None)
             session.pop("email_id", None)
-            selected_values_json = request.form.get('cost_limit')
-            cost_limit_values=json.loads(selected_values_json)
-            session["cost_limit"]=cost_limit_values
             
-            print(cost_limit_values)
+            # Check if the 'cost_limit' field is present in the form
+            selected_values_json = request.form.get('cost_limit')
+            cost_limit_values = json.loads(selected_values_json) if selected_values_json else []
+            session["cost_limit"] = cost_limit_values
+            
+            # Check if the 'council_info' field is present in the form
             selected_values_2 = request.form.get('council_info')
-            council_info=json.loads(selected_values_2)
-            print("retrieval endpoint")
-            print(council_info) 
+            council_info = json.loads(selected_values_2) if selected_values_2 else []
             
             return render_template("retrieval.html")
         else:
             request_list = session.get("request_list")
-            cost_limit=session.get("cost_limit")
-            
+            cost_limit = session.get("cost_limit")
             
             responses = []
             tasks = []
-            print(len(request_list))
-            for request_item, cost_limit_value in zip(request_list, cost_limit):
-                tasks.append(process_request_item(request_item, cost_limit_value))
+            
+            if cost_limit:  # Check if cost_limit is not None and not empty
+                for request_item, cost_limit_value in zip(request_list, cost_limit):
+                    tasks.append(process_request_item(request_item, cost_limit_value))
+            else:
+                # If cost_limit is empty or None, iterate over request_list without zipping
+                for request_item in request_list:
+                    tasks.append(process_request_item(request_item, None))
+            
             responses = await asyncio.gather(*tasks)
-            print("checks before printing the whole thing ")
-            print(responses)
-
-           
+            
             response_dict = responses
             
-            print("duduudud")
-            print(response_dict)
-            print(type(response_dict))
+            # Pop the 'cost_limit' from session after use
             session.pop("cost_limit", None)
-           
+            
             return jsonify(response_dict)
     else:
-         return '''
+        return '''
         <script>
             alert('Sorry but you need to login to work with FOI');
             window.location = '/login';  
         </script>
         '''
+
+
 
 @application.route("/response", methods=["GET","POST"])
 async def response():
@@ -961,35 +977,37 @@ async def response():
 
     if 'user' in session:
         if request.method =="POST":
-            request_list=session.get("request_list")
-            data=request.get_json()
+            try:
+                request_list=session.get("request_list")
+                data=request.get_json()
 
-            extracted_data = [{'question': item['question'], 'answer': item['answer']} for item in data['data']]
-            
-            final=extracted_data
-            print("printinf data")
-            print(extracted_data)
-            
-            
-            return jsonify({"message":"successss"})
+                extracted_data = [{'question': item['question'], 'answer': item['answer']} for item in data['data']]
+                
+                final=extracted_data
+                logging.debug("Extracted data: %s", extracted_data)
+                
+                return jsonify({"message":"successss"})
+            except Exception as e:
+                logging.error("An error occurred in /response POST endpoint: %s", e)
+                return "An error occurred, please try again later."
         else:
-            foi_request=session.get("foi_request")
-            valid_dict = session.get("valid_dict")
-            vex_dict = session.get("vexatious_flag")
-            repeated_dict = session.get("repeated_dict")
-            request_list=session.get("request_list")
+            try:
+                foi_request=session.get("foi_request")
+                valid_dict = session.get("valid_dict")
+                vex_dict = session.get("vexatious_flag")
+                repeated_dict = session.get("repeated_dict")
+                request_list=session.get("request_list")
 
-            acknowledgment_text = await generate_acknowledgement_letter(request_list, valid_dict, vex_dict, repeated_dict)
-            print("acknowledement letter")
-            print(acknowledgment_text)
+                acknowledgment_text = await generate_acknowledgement_letter(request_list, valid_dict, vex_dict, repeated_dict)
+                logging.debug("Acknowledgment text: %s", acknowledgment_text)
+                
+                response_letter=await generate_response_letter(foi_request, final)
+                logging.debug("Response letter: %s", response_letter)
 
-            
-            response_letter=await generate_response_letter(foi_request, final)
-            
-
-
-
-            return render_template("response.html", response=response_letter, acknowledgment_text=acknowledgment_text)
+                return render_template("response.html", response=response_letter, acknowledgment_text=acknowledgment_text)
+            except Exception as e:
+                logging.error("An error occurred in /response GET endpoint: %s", e)
+                return "An error occurred, please try again later."
     else:
          return '''
         <script>
@@ -999,41 +1017,58 @@ async def response():
         '''
 
 
+
 @application.route("/refusal", methods=["POST", "GET"])
 def refusal():
-    if request.method =="POST":
-        refusal=request.form("refusal")
-        return render_template("refusal.html", refusal_text=refusal)
+    if request.method == "POST":
+        try:
+            refusal_text = request.form.get("refusal")
+            return render_template("refusal.html", refusal_text=refusal_text)
+        except Exception as e:
+            logging.error("An error occurred in /refusal POST endpoint: %s", e)
+            return "An error occurred, please try again later."
+    else:
+        return "Method not allowed"
 
 
 @application.route("/save_document", methods=["POST"])
 def save_document():
-    document_data = request.json
-    text = document_data.get("text")
-    filename = document_data.get("filename")
+    try:
+        document_data = request.json
+        text = document_data.get("text")
+        filename = document_data.get("filename")
 
-    # Create a new Document
-    doc = Document()
-    doc.add_paragraph(text)
+        # Create a new Document
+        doc = Document()
+        doc.add_paragraph(text)
 
-    # Save the document to a BytesIO object
-    doc_buffer = BytesIO()
-    doc.save(doc_buffer)
-    doc_buffer.seek(0)
+        # Save the document to a BytesIO object
+        doc_buffer = BytesIO()
+        doc.save(doc_buffer)
+        doc_buffer.seek(0)
 
-    # Return the document as a FileResponse for download
-    return send_file(
-        doc_buffer,
-        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        as_attachment=True  # This automatically sets the filename for download
-    )
+        # Return the document as a FileResponse for download
+        return send_file(
+            doc_buffer,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            as_attachment=True  # This automatically sets the filename for download
+        )
+    except Exception as e:
+        logging.error("An error occurred in /save_document endpoint: %s", e)
+        return "An error occurred, please try again later."
+
 
 @application.route("/logout")
 async def logout():
-    session.pop('user')
-    
-    
-    return redirect(url_for('login'))
+    try:
+        if 'user' in session:
+            user = session.pop('user')
+            logging.info("User '%s' has logged out.", user)
+        
+        return redirect(url_for('login'))
+    except Exception as e:
+        logging.error("An error occurred in /logout endpoint: %s", e)
+        return "An error occurred, please try again later."
 
 
 

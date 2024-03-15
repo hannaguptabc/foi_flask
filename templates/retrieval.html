@@ -428,11 +428,7 @@
         <!-- </form> -->
       </div>
     </div>
-    <!-- <div id="loadingOverlay" class="loading-overlay">
-      <div class="spinner"></div>
-      <div class="loading-text">Processing your request...</div>
-      <div id="messageContainer" style="display: none;"></div>
-  </div> -->
+    
     <footer class="footer" id="footer" style="display: none;"><p>Made with ❤️ by Agilisys</p></footer>
     <script>
 
@@ -615,71 +611,13 @@
         let divAIGeneratedExemptions = document.createElement('div');
         divAIGeneratedExemptions.className = 'exemptions';
 
-        // // Create the overlay for AI generated exemptions
-        // let divAIGeneratedExemptionsOverlay = document.createElement('div');
-        // divAIGeneratedExemptionsOverlay.className = 'overlay';
-        // divAIGeneratedExemptionsOverlay.id = 'ai-exemption-overlay';
-        // divAIGeneratedExemptionsOverlay.style.display = 'none';
-
-        // const closeAIExemptionModal = () => {
-        //   divAIGeneratedExemptionsOverlay.style.display = "none";
-        //   selectedExemptionIndex = null;
-        // };
-
-        // const openAIExemptionModal = (idx) => {
-        //   divAIGeneratedExemptionsOverlay.style.display = "flex";
-        //   selectedExemptionIndex = idx
-        // };
-
-        // let divAIGeneratedExemptionsModal = document.createElement('div');
-        // divAIGeneratedExemptionsModal.className = 'modal';
-        // divAIGeneratedExemptionsModal.id = 'ai-exemption-modal';
-        // let divAIGeneratedExemptionsTopSection = document.createElement('div');
-        // divAIGeneratedExemptionsTopSection.className = 'top-section';
-        // let divAIGeneratedExemptionsModalHeader = document.createElement('div');
-        // divAIGeneratedExemptionsModalHeader.className = 'modal-header';
-        // let h3AIGeneratedExemptionsHeading = document.createElement('h3');
-        // h3AIGeneratedExemptionsHeading.className = 'heading';
-        // let imgAIGeneratedExemptionsCloseIcon = document.createElement('img');
-        // imgAIGeneratedExemptionsCloseIcon.src = 'static/close.svg';
-        // imgAIGeneratedExemptionsCloseIcon.width = '25';
-        // imgAIGeneratedExemptionsCloseIcon.height = '25';
-        // imgAIGeneratedExemptionsCloseIcon.id = 'ai-exemption-modal-close-icon';
-        // imgAIGeneratedExemptionsCloseIcon.addEventListener('click', () => {
-        //   closeAIExemptionModal()
-        // })
-
+        
+     
         divAIGeneratedExemptionsSection.appendChild(h2AIGeneratedExemptions);
         divAIGeneratedExemptionsSection.appendChild(divAIGeneratedExemptions);
 
-        // divAIGeneratedExemptionsModalHeader.appendChild(h3AIGeneratedExemptionsHeading);
-        // divAIGeneratedExemptionsModalHeader.appendChild(imgAIGeneratedExemptionsCloseIcon);
-        // divAIGeneratedExemptionsTopSection.appendChild(divAIGeneratedExemptionsModalHeader);
-        // let divAIGeneratedExemptionsModalContent = document.createElement('div');
-        // divAIGeneratedExemptionsModalContent.className = 'modal-content';
-        // let h2AIGeneratedExemptionsEvidence = document.createElement('h2');
-        // h2AIGeneratedExemptionsEvidence.textContent = 'Evidence';
-        // let divAIGeneratedExemptionsRedactedText = document.createElement('div');
-        // divAIGeneratedExemptionsRedactedText.className = 'redacted-text';
-        // divAIGeneratedExemptionsModalContent.appendChild(h2AIGeneratedExemptionsEvidence);
-        // divAIGeneratedExemptionsModalContent.appendChild(divAIGeneratedExemptionsRedactedText);
-        // divAIGeneratedExemptionsTopSection.appendChild(divAIGeneratedExemptionsModalContent);
-        // let divAIGeneratedExemptionsModalBtnsContainer = document.createElement('div');
-        // divAIGeneratedExemptionsModalBtnsContainer.className = 'modal-btns-container';
-        // let btnAIGeneratedExemptionsApprove = document.createElement('button');
-        // btnAIGeneratedExemptionsApprove.className = 'approve';
-        // btnAIGeneratedExemptionsApprove.id = 'ai-approve-btn';
-        // btnAIGeneratedExemptionsApprove.textContent = 'Approve';
-        // let btnAIGeneratedExemptionsReject = document.createElement('button');
-        // btnAIGeneratedExemptionsReject.className = 'reject';
-        // btnAIGeneratedExemptionsReject.id = 'ai-reject-btn';
-        // btnAIGeneratedExemptionsReject.textContent = 'Reject';
-        // divAIGeneratedExemptionsModalBtnsContainer.appendChild(btnAIGeneratedExemptionsApprove);
-        // divAIGeneratedExemptionsModalBtnsContainer.appendChild(btnAIGeneratedExemptionsReject);
-        // divAIGeneratedExemptionsModal.appendChild(divAIGeneratedExemptionsTopSection);
-        // divAIGeneratedExemptionsModal.appendChild(divAIGeneratedExemptionsModalBtnsContainer);
-        // divAIGeneratedExemptionsOverlay.appendChild(divAIGeneratedExemptionsModal);
-
+      
+      
 
         const aiGenExemptions = Object.keys(data.exemptions);
         const aiGenExemptionEvidences = Object.values(data.exemptions)
@@ -689,12 +627,7 @@
           exemptionDiv.className = 'name';
           exemptionDiv.textContent = aiGenExemptions[i]
           exemptionDiv.setAttribute('id', `ai-exemption-${i}`)
-          // exemptionDiv.addEventListener('click', () => {
-          //   // selectedExemptionIndex = index;
-          //   openAIExemptionModal(i);
-          //  h3AIGeneratedExemptionsHeading.textContent = aiGenExemptions[i]
-          //  divAIGeneratedExemptionsRedactedText.textContent = aiGenExemptionEvidences[i]
-          // })
+          
           divAIGeneratedExemptions.appendChild(exemptionDiv)
         }
 
@@ -715,11 +648,7 @@
         divOwnExemptions.id = `own-exemptions-question-${index}`;
 
         
-        // let divOwnExemptionIndex = document.createElement('div');
-        // divOwnExemptionIndex.className = 'name';
-        // divOwnExemptionIndex.id = 'own-exemption-index';
-        // divOwnExemptionIndex.textContent = '{{red}}';
-        // divOwnExemptions.appendChild(divOwnExemptionIndex);
+        
 
        
 
@@ -884,20 +813,13 @@
         console.log('enene', answerTextareas, questions);
 
         const payloadData = []
-        // for(let i = 0;i<questions.length;++i){
-        //   const obj = {
-        //     question: 
-        //   }
-        // }
-        // const payload = questions.map((question,index) => {
-        //   return {question: question.textContent, answer: answerTextareas[index].value }
-        // })
+      
 
         questions.forEach((item,index) => {
           payloadData.push({question: item.textContent, answer: answerTextareas[index].value})
         });
 
-        // console.log(payload);
+        
 
         const res = await fetch('/response', {
           method: 'POST',
@@ -911,172 +833,7 @@
       })
 
       
-// Call the function to generate exemptions HTML
-      // generateExemptionsHTML();
 
-
-      // const questionsContainerList = document.querySelectorAll('.question-container')
-
-      // console.log(questionsContainerList);
-      // console.log("{{responses_json}}");
-
-
-    //   data.forEach((questionData) => {
-
-    //   // const AIGeneratedExemptions = questionsContainer.querySelectorAll("div[id^=ai-exemption-index]");
-      
-    //   const redactedText = questionsContainer.querySelector("#redacted-text");
-    //   const aiExemptionOverlay = questionsContainer.querySelector("#ai-exemption-overlay");
-    //   const aiExemptionModal = questionsContainer.querySelector("#ai-exemption-modal");
-    //   const aiExemptionModalClose = questionsContainer.querySelector("#ai-exemption-modal-close-icon");
-    //   const approveAIRedactionBtn = questionsContainer.querySelector("#ai-approve-btn");
-    //   const addExemptionBtn = questionsContainer.querySelector("#own-approve-btn");
-
-    //   const rejectAIRedactionBtn = questionsContainer.querySelector("#ai-reject-btn");
-
-    //   let selectedExemptionIndex = null;
-      
-    //   const closeAIExemptionModal = () => {
-    //     aiExemptionOverlay.style.display = "none";
-    //     selectedExemptionIndex = null;
-    //   };
-
-    //   const openAIExemptionModal = () => {
-    //     aiExemptionOverlay.style.display = "flex";
-    //   };
-
-    //   aiExemptionModalClose.addEventListener("click", closeAIExemptionModal);
-
-    //   AIGeneratedExemptions.forEach((exemption, index) => {
-    //     exemption.setAttribute("id", `ai-exemption-${index}`);
-    //     exemption.addEventListener("click", () => {
-    //       selectedExemptionIndex = index;
-    //       openAIExemptionModal();
-    //     });
-    //   });
-
-    //   const ownExemptions = questionsContainer.querySelector("#own-exemptions");
-
-    //   const ownExemptionOverlay = questionsContainer.querySelector("#own-exemption-overlay"
-    //   );
-    //   const ownExemptionModal =questionsContainer.querySelector("#ai-exemption-modal");
-    //   const ownExemptionModalClose = questionsContainer.querySelector("#own-exemption-modal-close-icon"
-    //   );
-
-    //   const ALL_EXEMPTIONS = questionsContainer.querySelectorAll('#own-exemption-index')
-
-    //   const closeOwnExemptionModal = () => {
-    //     ownExemptionOverlay.style.display = "none";
-    //     selectedExemptionIndex = null;
-    //   };
-
-    //   const openOwnExemptionModal = () => {
-    //     ownExemptionOverlay.style.display = "flex";
-    //   };
-
-    //   ALL_EXEMPTIONS.forEach((exemption, index) => {
-    //     exemption.setAttribute("id", `own-exemption-${index}`);
-    //     exemption.addEventListener("click", () => {
-    //       selectedExemptionIndex = index;
-    //       openOwnExemptionModal();
-    //     });
-    //   });
-
-    //   ownExemptionModalClose.addEventListener("click", closeOwnExemptionModal);
-
-    //   var TextHighlighter = (function() {
-    //     var selectedText = '';
-
-    //     function highlightSelectedText(color) {
-    //         if (!selectedText) return;
-
-    //         var selection = window.getSelection();
-    //         if (selection.rangeCount > 0) {
-    //             var range = selection.getRangeAt(0);
-    //             var span = document.createElement('span');
-    //             span.style.backgroundColor = color;
-    //             span.classList.add('highlighted');
-    //             range.surroundContents(span);
-    //         }
-    //     }
-
-    //     function captureSelection() {
-    //         selectedText = window.getSelection().toString();
-    //     }
-
-    //     function init() {
-    //         document.addEventListener('mouseup', captureSelection);
-    //     }
-
-    //     return {
-    //         init: init,
-    //         highlight: highlightSelectedText
-    //     };
-    // })();
-
-    //   TextHighlighter.init();
-
-
-
-    //   addExemptionBtn.addEventListener("click", () => {
-    //     if (selectedExemptionIndex == null) {
-    //       console.error("No selected exemption found");
-    //     }
-
-    //     const selectedText = window.getSelection().toString();
-    //     console.log(selectedText);
-    //     const selectedExemption = document.getElementById(
-    //         `own-exemption-${selectedExemptionIndex}`
-    //       );
-    //       selectedExemption.classList.add("approved");
-        
-
-    //     const unredactedAnswer = questionsContainer.querySelector('#unredacted-answer')
-    //     const answer = questionsContainer.querySelector('#answer')
-
-    //     const prevAnswer = answer.textContent.trim();
-    //     const newAnswer = prevAnswer.replace(selectedText.trim(),'')
-
-    //     if(newAnswer == null || newAnswer == ''){
-    //       const ownExemptionsList = ownExemptions.querySelectorAll('.approved')
-          
-    //       let combinedSectionsString = ''
-
-    //       console.log(ownExemptionsList);
-
-    //       if(ownExemptionsList.length>1){
-    //         console.log(ownExemptionsList);
-
-    //         for(let i = 0;i<ownExemptionsList.length;++i){
-    //           if(i<ownExemptionsList.length-1){
-    //             combinedSectionsString += (', '+ ownExemptionsList[i].textContent)
-    //           }
-    //           else{
-    //             combinedSectionsString += ('and '+ ownExemptionsList[i].textContent)
-    //           }
-    //         }
-    //         console.log(combinedSectionsString);
-    //     }
-    //     else{
-    //       combinedSectionsString = ownExemptionsList[0].textContent.trim().replaceAll('\n', '')
-    //       console.log(combinedSectionsString);
-    //     }
-
-    //       answer.value = `We would not be able to answer your request under ${combinedSectionsString.trim().replaceAll('\n', '')}.`
-    //       answer.textContent = `We would not be able to answer your request under ${combinedSectionsString.trim().replaceAll('\n', '')}.`
-
-    //     }
-    //     else {
-    //       answer.value = newAnswer
-    //       answer.textContent = newAnswer
-    //     }
-
-      
-    //     // closeAIExemptionModal();
-    //   });
-    // })
-
-    //   })
     })
       
     </script>
