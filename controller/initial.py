@@ -47,14 +47,16 @@ logging.basicConfig(level=logging.DEBUG)
 logging.getLogger().addHandler(file_handler)
 # Set the logging level
 logging.getLogger().setLevel(logging.INFO)
+
 CONNECTION_STRING = PGVector.connection_string_from_db_params(
     driver=os.environ.get("PGVECTOR_DRIVER", "psycopg2"),
     host=os.environ.get("PGHOST"),
     port=os.environ.get("PGPORT"),
     database=os.environ.get("PGDATABASE"),
     user=os.environ.get("PGUSER"),
-    password=os.environ.get("PGPASSWORD"),
+    password=os.environ.get("PGPASSWORD")
 )
+
 
 
 EMBEDDINGS = AzureOpenAIEmbeddings(
@@ -80,12 +82,19 @@ class User:
         self.hashed_password = hashed_password
         self.created_at = created_at
 def get_db_connection():
+    keepalive_kwargs = {
+    "keepalives": 1,
+    "keepalives_idle": 30,
+    "keepalives_interval": 5,
+    "keepalives_count": 5,
+}
     return psycopg2.connect(
         dbname=os.environ.get('FOI_DATABASE'),
         user=os.environ.get('user'),
         password=os.environ.get('pgfoipassword'),
         host=os.environ.get('pgfoihost'),
-        port=os.environ.get('pgfoiport')
+        port=os.environ.get('pgfoiport'),
+        **keepalive_kwargs
 
     )
 
@@ -596,45 +605,53 @@ def extract_json_from_braces(text):
     return json_string
 
 
-async def process_request_item(request_item, cost):
-    if cost is not None and cost.lower() == "no":
-        docs = await vectorstore.asimilarity_search_with_score(request_item)
-        print("*************")
-        print(docs)
-        extracted_documents = {}
-        for doc, score in docs:
-            page_content = doc.page_content
-            redactions = doc.metadata.get('redactions', {})
-            extracted_documents[page_content] = redactions
-        response = await get_response(request_item, extracted_documents)
-        print("response")
-        print(response)
-        response = extract_json_from_braces(response)
-        response = ast.literal_eval(response)
-        return response
-    elif cost is None:
-        docs = await vectorstore.asimilarity_search_with_score(request_item)
-        print("*************")
-        print(docs)
-        extracted_documents = {}
-        for doc, score in docs:
-            page_content = doc.page_content
-            redactions = doc.metadata.get('redactions', {})
-            extracted_documents[page_content] = redactions
-        response = await get_response(request_item, extracted_documents)
-        print("response")
-        print(response)
-        response = extract_json_from_braces(response)
-        response = ast.literal_eval(response)
-        return response
-    
-
-    else:
+async def process_request_item(request_item, cost, online_info):
+    if cost is not None and cost.lower() == "yes":
         response = {
             "request": request_item,
             "response": "We refuse to answer this request  under Section 12 of FOIA as it exceeds statuary cost limit.",
             "exemptions": {}
         }
+        return response
+    # elif cost is None:
+    #     docs = await vectorstore.asimilarity_search_with_score(request_item)
+    #     print("*************")
+    #     print(docs)
+    #     extracted_documents = {}
+    #     for doc, score in docs:
+    #         page_content = doc.page_content
+    #         redactions = doc.metadata.get('redactions', {})
+    #         extracted_documents[page_content] = redactions
+    #     response = await get_response(request_item, extracted_documents)
+    #     print("response")
+    #     print(response)
+    #     response = extract_json_from_braces(response)
+    #     response = ast.literal_eval(response)
+    #     return response
+    
+    elif online_info.lower() == "yes":
+        response = {
+            "request": request_item,
+            "response": "We found that the information you requested is already available and accessible on our official website. You can access the information directly through the following link: https://n-somerset.gov.uk/ .",
+            "exemptions": {}
+        }
+        return response
+
+    else:
+        docs = await vectorstore.asimilarity_search_with_score(request_item)
+        print("*************")
+        print(docs)
+        extracted_documents = {}
+        for doc, score in docs:
+            page_content = doc.page_content
+            redactions = doc.metadata.get('redactions', {})
+            extracted_documents[page_content] = redactions
+        response = await get_response(request_item, extracted_documents)
+        print("response")
+        print(response)
+        response = extract_json_from_braces(response)
+        response = ast.literal_eval(response)
+        
         return response
         
 async def process_requests(request_list):
@@ -866,6 +883,9 @@ async def check_repeated():
 
 @application.route("/completeness_check", methods=["GET","POST"])
 async def check_completeness():
+    
+
+    
     services = [
             "Adult Services",
             "Children's Services",
@@ -886,38 +906,42 @@ async def check_completeness():
         ]
     if request.method =="POST":
         department_list=[]
+        online_info_present_json = request.form.get('online_info_answers')
+        print(online_info_present_json)
         
         request_list=session.get("request_list")
         print("checking completeness endpoint")
         print(request_list)
         
-        complete_dict = await process_requests(request_list)
-        for key, value in complete_dict.items():
-    # Check if the value is a string and contains '%' sign
-            if isinstance(value, str) and '%' in value:
-                # Remove '%' sign and convert the value to float
-                percentage_value = float(value.replace('%', ''))
-                # Check if the percentage is less than 100
-                if percentage_value < 100:
-                    department =await get_department(key)
-                    department_list.append(department)
+        online_info_present = json.loads(online_info_present_json) if online_info_present_json else []
+        print("checking the json now")
+        print(online_info_present)
+        request_list_filtered = [request_list[i] for i, val in enumerate(online_info_present) if val.lower() != "yes"]
+        session["online_info_present"]=online_info_present
+        complete_dict = await process_requests(request_list_filtered)
 
+        department_list = []
+        for key, value in complete_dict.items():
+            if isinstance(value, str) and '%' in value:
+                percentage_value = float(value.replace('%', ''))
+                if percentage_value < 100:
+                    department = await get_department(key)
+                    department_list.append(department)
                 else:
                     department_list.append("-")
             else:
                 print(f"The value for key '{key}' is not in string format or doesn't contain '%' sign.")
-        
-
-        
         print(complete_dict)
-        print("^^^^^^^^^^^^^^^")
+        session["complete_dict"] = complete_dict
+        session["department_list"] = department_list
+        all_values_100_percent = all(value == "100%" for value in complete_dict.values())
+        session["all_values_100_percent"] = all_values_100_percent
+        print("department_list")
         print(department_list)
-        session["complete_dict"]=complete_dict
-        session["department_list"]=department_list
-        
-        return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services)
+
+        return render_template("completeness.html", complete_dict=complete_dict, department_list=department_list, services=services, all_values_100_percent=all_values_100_percent)
     else:
-        return render_template("completeness.html", complete_dict=session.get("complete_dict"), department_list=session.get("department_list"), services=services)
+        return render_template("completeness.html", complete_dict=session.get("complete_dict"), department_list=session.get("department_list"), services=services, all_values_100_percent=session.get("all_values_100_percent"))
 
 @application.route("/retrieval", methods=["GET", "POST"])
 async def retrieval():
@@ -927,6 +951,7 @@ async def retrieval():
             session.pop("department_list", None)
             session.pop("timestamp", None)
             session.pop("email_id", None)
+            session.pop("all_values_100_percent", None)
             
             # Check if the 'cost_limit' field is present in the form
             selected_values_json = request.form.get('cost_limit')
@@ -944,14 +969,15 @@ async def retrieval():
             
             responses = []
             tasks = []
+            online_info_present=session.get("online_info_present")
             
             if cost_limit:  # Check if cost_limit is not None and not empty
-                for request_item, cost_limit_value in zip(request_list, cost_limit):
-                    tasks.append(process_request_item(request_item, cost_limit_value))
+                for request_item, cost_limit_value, online_info_value in zip(request_list, cost_limit, online_info_present):
+                    tasks.append(process_request_item(request_item, cost_limit_value, online_info_value))
             else:
                 # If cost_limit is empty or None, iterate over request_list without zipping
-                for request_item in request_list:
-                    tasks.append(process_request_item(request_item, None))
+                for request_item, online_info_value in zip(request_list, online_info_present):
+                    tasks.append(process_request_item(request_item, None, online_info_value))
             
             responses = await asyncio.gather(*tasks)
             

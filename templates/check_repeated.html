@@ -225,6 +225,7 @@
                             <th>Vexatious Flag</th>
                             <th>Validation Result</th>
                             <th>Repeated Result</th>
+                            <th>Is this information already present online?</th> <!-- New column -->
                         </tr>
                     </thead>
                     <tbody>
@@ -233,7 +234,7 @@
                                 <td>{{ component }}</td>
                                 <!-- Check for vexatious flag and display appropriate symbol -->
                                 <td style="text-align: center;">
-                                    {% if vexatious_flags[component] ==0%}
+                                    {% if vexatious_flags[component] == 0 %}
                                     &#10008; <!-- Cross mark -->
                                     {% else %}
                                     &#10004; <!-- Tick mark -->
@@ -251,6 +252,13 @@
                                 </td>
                                 <!-- Display repeated result -->
                                 <td style="text-align: center;">{{ result }}</td>
+                                <!-- Is this information already present online? -->
+                                <td style="text-align: center;">
+                                    <select name="online_info{{ loop.index }}" class="onlineInfoDropdowns">
+                                        <option value="No" selected>No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -260,6 +268,8 @@
                     <button type="submit" class="button">Previous</button>
                 </form>
                 <form id="nextForm" action="/completeness_check" method="post">
+                    <!-- Include hidden fields to post the answers -->
+                    <input type="hidden" name="online_info_answers">
                     <button type="submit" class="button">Next</button>
                 </form>
             </div>
@@ -278,22 +288,50 @@
     <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
     <script>
         document.querySelector('.logout-btn').addEventListener('click', function() {
-            window.location.href = "/logout"; // Redirect to the /logout route
+        window.location.href = "/logout"; // Redirect to the /logout route
+    });
+
+    document.getElementById('nextForm').addEventListener('submit', function() {
+        // Get all selected values from the dropdowns
+        const onlineInfoDropdowns = document.querySelectorAll('.onlineInfoDropdowns');
+        const selectedOnlineInfoValues = [];
+        onlineInfoDropdowns.forEach(function(dropdown) {
+            const selectedValue = dropdown.value;
+        selectedOnlineInfoValues.push(selectedValue);
         });
-        document.getElementById('nextForm').addEventListener('submit', function() {
-          showLoading();
-      });
-      
-      function hideLoading() {
-          const loadingOverlay = document.getElementById('loadingOverlay');
-          loadingOverlay.style.display = 'none';
-      }
-      function showLoading() {
-          const loadingOverlay = document.getElementById('loadingOverlay');
-          loadingOverlay.style.display = 'flex';
-      }
 
+        // Set the value of the hidden input field to post the answers
+        const hiddenInput = document.querySelector('input[name="online_info_answers"]');
+        hiddenInput.value = JSON.stringify(selectedOnlineInfoValues);
+        
+        onlineInfoDropdowns.forEach(function(dropdown){
+            dropdown.addEventListener('change', function(){
 
+                const selectedValue=this.value;
+                const allValues=[];
+                onlineInfoDropdowns.forEach(function(dropdown) {
+            allValues.push(dropdown.value); // Store the selected value of each dropdown
+        });
+
+        hiddenOnlineInfoInput.value = JSON.stringify(allValues); // Convert the array to JSON string and set it as the value of the hidden input field
+        // Submit the form
+        form.submit();
+            })
+
+        })
+        // Show loading overlay
+        showLoading();
+    });
+
+    function hideLoading() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.style.display = 'none';
+    }
+
+    function showLoading() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.style.display = 'flex';
+    }
     </script>
 </body>
 </html>

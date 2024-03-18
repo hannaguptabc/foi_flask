@@ -6,50 +6,54 @@
     <title>Response Letter</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-       body {
+        body {
             font-family: 'Arial', sans-serif;
             background-color: #f4f4f4;
             color: #333;
             margin: 0;
+            padding-bottom: 80px; /* Added padding to accommodate footer */
         }
 
         .container {
             display: flex;
-            flex-wrap: wrap; /* Allow containers to wrap */
-            justify-content: center; /* Center align items horizontally */
-            margin-top: 100px; /* Adjust margin to make space for the header */
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 100px;
+            width: 100%;
+            max-width: 1200px;
         }
 
-        .response-container, .acknowledgment-container {
-            flex: 0 0 calc(50% - 20px);
+        .response-container,
+        .acknowledgment-container {
+            flex: 1;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            margin-bottom: 20px;
-            width: calc(50% - 40px); /* Adjust width to ensure two containers fit in a row */
-            max-width: 600px; /* Limit maximum width of containers */
-            margin-right: 20px; /* Add margin between containers */
-            margin-left: 20px; /* Add margin between containers */
+            margin: 0 10px; /* Adjust margin */
+            height: max-content; /* Adjust height to content */
+            max-height: 100vh; /* Limit max height to 80% of viewport height */
+            overflow-y: auto;
         }
 
         .custom-textarea {
-            width: 100%;
+            width: calc(100% - 20px);
             margin-bottom: 20px;
             border: 2px solid #ddd;
             border-radius: 8px;
             padding: 10px;
             font-size: 16px;
-            resize: none; /* Prevent resizing */
-            transition: border-color 0.3s ease; /* Smooth transition on hover/focus */
-            height: 200px; /* Adjust the height as needed  */
+            resize: none;
+            transition: border-color 0.3s ease;
+            height: 200px;
+            overflow: auto;
         }
 
         .custom-textarea:focus,
         .custom-textarea:hover {
-            border-color: #005eb8; /* Highlight border on hover/focus */
-            outline: none; /* Remove default focus outline */
+            border-color: #005eb8;
+            outline: none;
         }
 
         .custom-button {
@@ -63,12 +67,12 @@
             border: none;
             border-radius: 5px;
             background-color: #005eb8;
-            transition: background-color 0.3s ease; /* Smooth transition on hover */
-            margin-top: 10px; /* Add margin */
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
         }
 
         .custom-button:hover {
-            background-color: #004080; /* Darker shade on hover */
+            background-color: #004080;
         }
 
         h1, h2 {
@@ -77,7 +81,14 @@
 
         h2 {
             color: #333;
-            margin-top: 10px; /* Provide a bit of space between header and h2 */
+            margin-top: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+            padding: 20px;
         }
 
         .logout-btn {
@@ -103,152 +114,46 @@
         }
 
         .header {
-    padding: 1.25rem 2rem;
-    background-color: white; /* Set background color */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
-    position: fixed; /* Change position to fixed */
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000; /* Ensure the header is on top */
-}
-
-      .client-details {
-        color: white;
-        font-weight: 500;
-      }
-
-      .client-details h1 {
-        font-size: 18px;
-        font-weight: 600;
-      }
-      .client-details h2 {
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .developer-details {
-        display: flex;
-        gap: 0.5rem;
-        font-weight: 600;
-        color: white;
-        align-items: center;
-      }
-
-        h1, h2 {
-            margin: 0;
+            padding: 1.25rem 2rem;
+            background-color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
 
-        h2 {
-            color: #333;
-            margin-top: 10px; /* Provide a bit of space between header and h2 */
+        .developer-details {
+            color: white;
+            font-weight: 500;
         }
 
-        .custom-textarea {
-            width: 100%;
-            margin-bottom: 20px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            font-size: 16px;
-            resize: none; /* Prevent resizing */
-            transition: border-color 0.3s ease; /* Smooth transition on hover/focus */
-            height: 200px; /* Adjust the height as needed  */
+        .developer-details h1 {
+            font-size: 18px;
+            font-weight: 600;
         }
 
-        .custom-textarea:focus,
-        .custom-textarea:hover {
-            border-color: #005eb8; /* Highlight border on hover/focus */
-            outline: none; /* Remove default focus outline */
+        .developer-details h2 {
+            font-size: 14px;
+            font-weight: 500;
         }
-
-        .custom-button {
-            display: inline-block;
-            padding: 12px 24px;
-            text-align: center;
-            text-decoration: none;
-            color: #fff;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #005eb8;
-            transition: background-color 0.3s ease; /* Smooth transition on hover */
-            margin-top: 10px; /* Add margin */
-        }
-
-        .custom-button:hover {
-            background-color: #004080; /* Darker shade on hover */
-        }
-
-        p {
-            margin-top: 20px;
-            font-size: 16px;
-        }
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: #f0f4f8;
-            font-family: "Poppins", sans-serif;
-            color: #333;
-            line-height: 1.6;
-        } 
-
-        
-
-      .client-details {
-        color: white;
-        font-weight: 500;
-      }
-
-      .client-details h1 {
-        font-size: 18px;
-        font-weight: 600;
-      }
-      .client-details h2 {
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .developer-details {
-        display: flex;
-        gap: 0.5rem;
-        font-weight: 600;
-        color: white;
-        align-items: center;
-      }
-
-      .wrapper {
-        width: 90%;
-        min-width: 250px;
-        max-width: 1200px;
-        padding: calc(var(--navbar-height) + 3rem) 1rem 0rem 1rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-      }
-
 
         .wrapper {
-            padding: calc(100px + 40px) 20px 20px;
-            max-width: 960px;
+            width: 90%;
+            min-width: 250px;
+            max-width: 1200px;
+            padding: calc(var(--navbar-height) + 3rem) 1rem 0rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             margin: 0 auto;
         }
 
-        
-
-        
         .input-container label {
             display: block;
             margin-bottom: 10px;
@@ -269,10 +174,6 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: border-color 0.3s, box-shadow 0.3s;
         }
-        tbody td {
-            border-bottom: 1px solid #ddd; /* Add a light border bottom */
-            padding: 10px 0; /* Adjust padding as needed */
-            }
 
         .input-container textarea {
             resize: vertical;
@@ -342,9 +243,11 @@
             right: 20px;
             z-index: 1100;
         }
+
         th:last-child, td:last-child {
-            text-align: center; /* Center align the content in the last column */
+            text-align: center;
         }
+
         .blue-box {
             background-color: #0066cc;
             color: white;
@@ -352,6 +255,7 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+
         .loading-overlay {
             display: none;
             position: fixed;
@@ -362,13 +266,13 @@
             background-color: rgba(255, 255, 255, 0.7);
             justify-content: center;
             align-items: center;
-            flex-direction: column; /* Added */
+            flex-direction: column;
             z-index: 9999;
         }
 
         .spinner {
-            border: 8px solid #f3f3f3; /* Light grey */
-            border-top: 8px solid #3498db; /* Blue */
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -376,35 +280,34 @@
         }
 
         .loading-text {
-            margin-top: 20px; /* Added */
-            font-size: 16px; /* Added */
+            margin-top: 20px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="developer-details">
-          <img src="static/Logo-Primary.png" width="100px" />
+            <img src="static/Logo-Primary.png" width="100px" />
         </div>
-        <!-- <div><img src="static/nhs-logo.png" width="100px" /></div> -->
-      <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
-          <button class="logout-btn">Logout</button>
+        <div><img src="static/image.png" alt="NHS Logo" width="100px"/></div>
+        <button class="logout-btn">Logout</button>
     </header>
     
     <div class="container">
         <div class="response-container">
             <h2>Response Letter</h2>
-            <textarea id="responseTextarea" class="custom-textarea" rows="10" cols="50">{{ response }}</textarea><br>
-            <button class="custom-button" onclick="saveAndDownloadResponse()">Download Response</button> <!-- Added button for response -->
+            <textarea id="responseTextarea" class="custom-textarea" rows="50" cols="50">{{ response }}</textarea><br>
+            <button class="custom-button" onclick="saveAndDownloadResponse()">Download Response</button>
         </div>
         <div class="acknowledgment-container">
             <h2>Acknowledgment Letter</h2>
-            <textarea id="acknowledgmentTextarea" class="custom-textarea" rows="10" cols="50">{{ acknowledgment_text }}</textarea><br>
-            <button class="custom-button" onclick="saveAndDownloadAcknowledgment()">Download Acknowledgment</button> <!-- Added button for acknowledgment -->
+            <textarea id="acknowledgmentTextarea" class="custom-textarea" rows="50" cols="50">{{ acknowledgment_text }}</textarea><br>
+            <button class="custom-button" onclick="saveAndDownloadAcknowledgment()">Download Acknowledgment</button>
         </div>
     </div>
 
-    <a href="/" class="custom-button"><i class="fas fa-home"></i> Home</a>
+    <a href="/index" class="custom-button"><i class="fas fa-home"></i> Home</a>
 
     <script>
         function saveAndDownloadResponse() {

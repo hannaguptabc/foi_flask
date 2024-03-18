@@ -242,67 +242,66 @@
         <button class="logout-btn">Logout</button>
     </header>
     <div class="wrapper">
-    <div class="container">
-        <h2>Completeness Check</h2>
-
-        {% if complete_dict %}
-    <table>
-        <thead>
-            <tr>
-                <th>Component</th>
-                <th>Completeness</th>
-                {% if not complete_dict.values() | select('equalto', '100%') | list %}
-                    <th>Does this request exceed the statutory cost limit? If yes, enter the amount</th>
-                    <th>Does the council hold the information?</th>
-                    <th>Redirect to this department for more Information!</th>
-                {% endif %}
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Loop through components and results -->
-            {% for component, result in complete_dict.items() %}
-                <tr>
-                    <td style="text-align: center;">{{ component }}</td>
-                    <td style="text-align: center;">{{ result }}</td>
-                    {% if not complete_dict.values() | select('equalto', '100%') | list %}
-                        <!-- Existing cost limit dropdown -->
-                        <td style="text-align: center;">
-                            <select name="cost_limit{{ loop.index }}" class="cost-limit-dropdown">
-                                <option value="No" selected>No</option>
-                                <option value="Yes">Yes</option>
-                            </select>
-                        </td>
+        <div class="container">
+            <h2>Completeness Check</h2>
         
-                        <!-- New dropdown for council information -->
-                        <td style="text-align: center;">
-                            <select name="council_info{{ loop.index }}" class="council-info-dropdown">
-                                <option value="No" selected>No</option>
-                                <option value="Yes">Yes</option>
-                            </select>
-                        </td>
-                        
-                        <td style="text-align: center;">
-                            {% if result != "100%" %}
-                                <select name="department{{ loop.index }}" class="department-dropdown" style="width: 240px;">
-                                    <option value="-" selected="{{department_list[loop.index0]}}">Select Department</option>
-                                    {% for service in services %}
-                                        {% if service == department_list[loop.index0] %}
-                                            <option value="{{ service }}" selected>{{ service }}</option>
-                                        {% else %} 
-                                            <option value="{{ service }}">{{ service }}</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                                <button class="send-btn">Send Request</button>
+            {% if complete_dict %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Completeness</th>
+                        {% if not all_values_100_percent %}
+                            <th>Does this request exceed the statutory cost limit? If yes, enter the amount</th>
+                            <th>Does the council hold the information?</th>
+                            <th>Redirect to this department for more Information!</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Loop through components and results -->
+                    {% for component, result in complete_dict.items() %}
+                        <tr>
+                            <td style="text-align: center;">{{ component }}</td>
+                            <td style="text-align: center;">{{ result }}</td>
+                            {% if not all_values_100_percent %}
+                                <!-- Existing cost limit dropdown -->
+                                <td style="text-align: center;">
+                                    <select name="cost_limit{{ loop.index }}" class="cost-limit-dropdown">
+                                        <option value="No" selected>No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </td>
+                
+                                <!-- New dropdown for council information -->
+                                <td style="text-align: center;">
+                                    <select name="council_info{{ loop.index }}" class="council-info-dropdown">
+                                        <option value="No" selected>No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </td>
+                                
+                                <td style="text-align: center;">
+                                    {% if result != "100%" %}
+                                        <select name="department{{ loop.index }}" class="department-dropdown" style="width: 240px;">
+                                            <option value="-" selected="{{department_list[loop.index0]}}">Select Department</option>
+                                            {% for service in services %}
+                                                {% if service == department_list[loop.index0] %}
+                                                    <option value="{{ service }}" selected>{{ service }}</option>
+                                                {% else %} 
+                                                    <option value="{{ service }}">{{ service }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                        <button class="send-btn">Send Request</button>
+                                    {% endif %}
+                                </td>
                             {% endif %}
-                        </td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    
             <div class="btn-wrapper">
                 <form action="/completeness" method="get">
                     <button type="submit" class="button">Previous</button>
@@ -313,134 +312,72 @@
                     <button type="submit" class="button">Next</button>
                 </form>
             </div>
-
-        {% else %}
-            <p>No result available.</p>
-        {% endif %}
-
-        
-        
-    </div>
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <div class="loading-text">Retrieving the contents....</div>
-        <div id="messageContainer" style="display: none;"></div>
-    </div>
-</div>
-    <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
-    <script>
-        document.querySelector('.logout-btn').addEventListener('click', function() {
-            window.location.href = "/logout"; // Redirect to the /logout route
-        });
-        
-        // Wait for the DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-        console.log("{{complete_dict}}");
-        // Get all department name spans
-        document.getElementById('loadingOverlay').style.display = 'none';
-        const departmentNames = document.querySelectorAll('.department-name');
-
-        // Add click event listener to each department name span
-        departmentNames.forEach(function(departmentName) {
-            departmentName.addEventListener('click', function() {
-                // Hide all dropdowns
-                const allDropdowns = document.querySelectorAll('.department-dropdown');
-                allDropdowns.forEach(function(dropdown) {
-                    dropdown.style.display = 'none';
-                });
-
-                // Show the corresponding dropdown
-                const index = departmentName.getAttribute('data-index');
-                const dropdown = document.querySelector('select[name="department' + index + '"]');
-                dropdown.style.display = 'block';
-
-                // Hide the department name span
-                departmentName.style.display = 'none';
-            });
-        });
-
-        // Add change event listener to all dropdowns
-        const dropdowns = document.querySelectorAll('.department-dropdown');
-        dropdowns.forEach(function(dropdown) {
-            dropdown.addEventListener('change', function() {
-                // Get the selected option value
-                const selectedDepartment = this.value;
-
-                // Update the corresponding department name span
-                const index = this.name.match(/\d+/)[0];
-                const departmentNameSpan = document.querySelector('.department-name[data-index="' + index + '"]');
-                departmentNameSpan.textContent = selectedDepartment;
-
-                // Hide the dropdown after selection
-                this.style.display = 'none';
-
-                // Show the department name span
-                departmentNameSpan.style.display = 'inline';
-            });
-        });
-    });
-    const costLimitDropdowns = document.querySelectorAll('.cost-limit-dropdown');
-
-// Iterate over each dropdown
-    const selectedValues = [];
-    costLimitDropdowns.forEach(function(dropdown) {
-    const selectedValue = dropdown.value;
-    selectedValues.push(selectedValue);
-    });
-
-    // Convert the array to JSON string and set it as the value of the hidden input field
-    const hiddenInput = document.querySelector('input[name="cost_limit"]');
-    hiddenInput.value = JSON.stringify(selectedValues);
-
     
-
-// Iterate over each dropdown
-    costLimitDropdowns.forEach(function(dropdown) {
-        dropdown.addEventListener('change', function() {
-            // Get the selected value
-            const selectedValue = this.value;
-
-            // Set the value of the hidden input field
-            const allValues = [];
-            costLimitDropdowns.forEach(function(dropdown) {
-                allValues.push(dropdown.value); // Store the selected value of each dropdown
+            {% else %}
+                <p>No result available.</p>
+            {% endif %}
+            
+        </div>
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">Retrieving the contents....</div>
+            <div id="messageContainer" style="display: none;"></div>
+        </div>
+    </div>
+        <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
+        <script>
+            document.querySelector('.logout-btn').addEventListener('click', function() {
+                window.location.href = "/logout"; // Redirect to the /logout route
             });
-            hiddenInput.value = JSON.stringify(allValues); // Convert the array to JSON string and set it as the value of the hidden input field
-
-            // Submit the form
-            form.submit();
-        });
-    });
-
-    const councilInfoDropdowns = document.querySelectorAll('.council-info-dropdown');
-
-    // Iterate over each dropdown
-    const selectedCouncilInfoValues = [];
-    councilInfoDropdowns.forEach(function(dropdown) {
-        const selectedValue = dropdown.value;
-        selectedCouncilInfoValues.push(selectedValue);
-    });
-    // Convert the array to JSON string and set it as the value of the hidden input field
-    const hiddenCouncilInfoInput = document.querySelector('input[name="council_info"]');
-    hiddenCouncilInfoInput.value = JSON.stringify(selectedCouncilInfoValues);
-
-    // Event listener for council info dropdown change
-    councilInfoDropdowns.forEach(function(dropdown) {
-    dropdown.addEventListener('change', function() {
-        // Get the selected value
-        const selectedValue = this.value;
-
-        // Set the value of the hidden input field
-        const allValues = [];
-        councilInfoDropdowns.forEach(function(dropdown) {
-            allValues.push(dropdown.value); // Store the selected value of each dropdown
-        });
-        hiddenCouncilInfoInput.value = JSON.stringify(allValues); // Convert the array to JSON string and set it as the value of the hidden input field
-
-        // Submit the form
-        form.submit();
-    });
-});
-    </script>
-</body>
-</html>
+            
+            // Wait for the DOM to be fully loaded
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log("{{complete_dict}}");
+                // Get all department name spans
+                document.getElementById('loadingOverlay').style.display = 'none';
+                const departmentNames = document.querySelectorAll('.department-name');
+    
+                // Add click event listener to each department name span
+                departmentNames.forEach(function(departmentName) {
+                    departmentName.addEventListener('click', function() {
+                        // Hide all dropdowns
+                        const allDropdowns = document.querySelectorAll('.department-dropdown');
+                        allDropdowns.forEach(function(dropdown) {
+                            dropdown.style.display = 'none';
+                        });
+    
+                        // Show the corresponding dropdown
+                        const index = departmentName.getAttribute('data-index');
+                        const dropdown = document.querySelector('select[name="department' + index + '"]');
+                        dropdown.style.display = 'block';
+    
+                        // Hide the department name span
+                        departmentName.style.display = 'none';
+                    });
+                });
+    
+                // Add change event listener to all dropdowns
+                const dropdowns = document.querySelectorAll('.department-dropdown');
+                dropdowns.forEach(function(dropdown) {
+                    dropdown.addEventListener('change', function() {
+                        // Get the selected option value
+                        const selectedDepartment = this.value;
+    
+                        // Update the corresponding department name span
+                        const index = this.name.match(/\d+/)[0];
+                        const departmentNameSpan = document.querySelector('.department-name[data-index="' + index + '"]');
+                        departmentNameSpan.textContent = selectedDepartment;
+    
+                        // Hide the dropdown after selection
+                        this.style.display = 'none';
+    
+                        // Show the department name span
+                        departmentNameSpan.style.display = 'inline';
+                    });
+                });
+            });
+        </script>
+    </body>
+    </html>
+    
+    

@@ -487,28 +487,7 @@
     statuxText.textContent = "Completed";
   };
 
-//   nextBtn.addEventListener("click", () => {
-//     if (currentStep === 0) {
-//       completeStep(fullnameContainer);
-//       const statusText = vexatiousContainer.querySelector("p");
-//       statusText.textContent = "Processing Vexatious request";
-//       statusText.style.fontWeight = "500";
-//       confirmContainer.style.display = "block";
-//       //   currentStatus.textContent = "Processing Vexatious request";
-//       currentStep += 1;
-//       filledLine.setAttribute("data-step", currentStep);
-//     } else if (currentStep === 1) {
-//       completeStep(vexatiousContainer);
-//       currentStep += 1;
-//       const statusText = processingContainer.querySelector("p");
-//       statusText.style.fontWeight = "500";
-//       statusText.textContent = "Processing your request";
-//       filledLine.setAttribute("data-step", currentStep);
-//     } else {
-//       completeStep(processingContainer);
-//       filledLine.setAttribute("data-step", currentStep);
-//     }
-//   });
+
 
 
 document.querySelector('.logout-btn').addEventListener('click', function() {
@@ -600,41 +579,11 @@ approve2.addEventListener('click', async function(){
 
 
 
-//    completeStep(vexatiousContainer);
-//           currentStep += 1;
-//           const statusText = processingContainer.querySelector("p");
-//           statusText.style.fontWeight = "500";
-//           statusText.textContent = "Processing your request";
-//           filledLine.setAttribute("data-step", currentStep);
 
-//         if (data.full_name === "False") {
-//             // Ask the user if they want to proceed
-//             if (confirm("The given request does not contain the full name of the requestor. Do you still want to proceed?")) {
-//                 // Display message under loader
-//                 showMessage("Processing your request...", true);
-//             } else {
-//                 // Hide loading spinner and return if user chooses not to proceed
-//                 hideLoading();
-//                 return;
-//             }
-//         } else {
-//             // Display success message under loader
-//             showMessage("Full name present", false);
-//         }
-//         // Redirect to the identify_parts route after a delay
-//         setTimeout(() => {
-//             window.location.href = "/identify_parts";
-//         }, 2000); // Change the delay as needed
-
-// .catch(error => {
-//     console.error('Error:', error);
-//     // Handle errors if any
-// });
  
 }
 
-// Show loading spinner on form submission
-// showLoading();
+
 overlay.style.display = 'flex'
 
 // Submit the form data asynchronously using fetch
