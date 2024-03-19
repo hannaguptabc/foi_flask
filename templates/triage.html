@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOI Validation Result</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+    <title>Triaging Checks</title>
     <style>
         *,
         *::before,
@@ -71,42 +70,59 @@
             margin-top: 20px;
         }
 
-        .input-container label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-size: 18px;
-            color: #0066cc;
-        }
-
-        .input-container input[type="text"],
-        .input-container textarea,
-        .input-container input[type="datetime-local"] {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #0077cc;
+        .request-info {
             margin-bottom: 20px;
-            font-size: 16px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        tbody td {
-            border-bottom: 1px solid #ddd; /* Add a light border bottom */
-            padding: 10px 0; /* Adjust padding as needed */
-            }
-
-        .input-container textarea {
-            resize: vertical;
-            height: 150px;
         }
 
-        .input-container input[type="text"]:focus,
-        .input-container textarea:focus,
-        .input-container input[type="datetime-local"]:focus {
-            border-color: #0056b3;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+        .request-info h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .request-info .status-block {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .status-block {
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px; /* Adjust spacing between blocks */
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+}
+
+.status-block.green {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.status-block.red {
+    background-color: #f44336;
+    color: white;
+}
+
+        .evidence {
+            display: none;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .evidence p {
+            margin-bottom: 10px;
+        }
+
+        .evidence .checkbox {
+            margin-right: 10px;
+        }
+
+        .evidence .checkbox label {
+            margin-right: 5px;
         }
 
         .button-container input[type="submit"] {
@@ -164,9 +180,7 @@
             right: 20px;
             z-index: 1100;
         }
-        th:last-child, td:last-child {
-            text-align: center; /* Center align the content in the last column */
-        }
+
         .blue-box {
             background-color: #0066cc;
             color: white;
@@ -174,6 +188,7 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+
         .loading-overlay {
             display: none;
             position: fixed;
@@ -197,6 +212,7 @@
             height: 50px;
             animation: spin 2s linear infinite;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -205,6 +221,27 @@
         .loading-text {
             margin-top: 20px; /* Added */
             font-size: 16px; /* Added */
+        }
+        .table {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table-row {
+            display: table-row;
+        }
+
+        .table-cell {
+            display: table-cell;
+            padding: 10px;
+            border: 1px solid #ddd; /* Add border for cells */
+        }
+
+        .table-heading {
+            font-weight: bold;
+            text-align: center;
         }
     </style>
 </head>
@@ -219,43 +256,45 @@
     </header>
     <div class="wrapper">
         <div class="container">
-            <h2>Validation Result</h2>
-            {% if validation_dict %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Component</th>
-                    <th>Can it be recognised as a valid FOI request?</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for component, result in validation_dict.items() %}
-                    <tr>
-                        <td>{{ component }}</td>
-                        <td style="text-align: center;">{{ result }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-                <div class="btn-wrapper">
-                    <form action="/identify_parts" method="get">
-                        <button type="submit">Previous</button>
-                      </form>
-                      <form id="nextForm" action="/check_repeated" method="post">
-                        <input type="hidden" name="validation_dict_json" value="{{ validation_dict }}" />
-                        <button type="submit">Next</button>
-                      </form>
+            <div class="table">
+                <div class="table-row">
+                    <div class="table-cell table-heading">FOI Request</div>
+                    <div class="table-cell table-heading">Full Name and Vexatious Checks</div>
                 </div>
-                
-            {% else %}
-                <p>No validation result available.</p>
-            {% endif %}
-        </div>
-        <div id="loadingOverlay" class="loading-overlay">
-            <div class="spinner"></div>
-            <div class="loading-text">Checking for repeated request</div>
-            <div id="messageContainer" style="display: none;"></div>
+                <div class="table-row">
+                    <div class="table-cell">
+                        {{ foi_request }}
+                    </div>
+                    <div class="table-cell">
+                        <div class="status-block {{ 'green' if full_name else 'red' }}" onclick="toggleEvidence('full_name')">Full Name Present</div>
+                        <div class="status-block {{ 'green' if vexatious else 'red' }}" onclick="toggleEvidence('vexatious')">Not Vexatious</div>
+                        <div class="evidence" id="full_name_evidence">
+                            <!-- Evidence for Full Name -->
+                        </div>
+                        <div class="evidence" id="vexatious_evidence">
+                            {{ vex_evidence }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-wrapper">
+                <form action="/index" method="get">
+                    <button type="submit" class="button">Previous</button>
+                </form>
+                {% if refusal %}
+                <form action="/refusal" method="post">
+                    <input type="hidden" name="refusal_text" value="{{ refusal }}">
+                    <button type="submit" class="button">Generate Refusal Letter</button>
+                </form>
+                {% endif %}
+                <form id="nextForm" action="/identify_parts" method="post">
+                    <button type="submit" class="button">Next</button>
+                </form>
+            </div>
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="spinner"></div>
+                <div class="loading-text">Checking for validation</div>
+            </div>
         </div>
     </div>
     <footer class="footer"><p>Made with ❤️ by Agilisys</p></footer>
@@ -265,17 +304,25 @@
         });
         document.getElementById('nextForm').addEventListener('submit', function() {
           showLoading();
-      });
+        });
       
-      function hideLoading() {
-          const loadingOverlay = document.getElementById('loadingOverlay');
-          loadingOverlay.style.display = 'none';
-      }
-      function showLoading() {
-          const loadingOverlay = document.getElementById('loadingOverlay');
-          loadingOverlay.style.display = 'flex';
-      }
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'none';
+        }
+        function showLoading() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+        }
 
+        function toggleEvidence(evidenceId) {
+            const evidence = document.getElementById(evidenceId + "_evidence");
+            if (evidence.style.display === "none") {
+                evidence.style.display = "block";
+            } else {
+                evidence.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>

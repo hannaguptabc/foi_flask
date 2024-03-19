@@ -312,10 +312,10 @@ async def check_for_vexatious(text: list):
     vexatious_file_path = "triaging/1.2/section-14-dealing-with-vexatious-requests-0-0.pdf"
     pdf_text = read_pdf_mupdf(vexatious_file_path)
     content = f'''
-YYou are a Freedom of Information request responder, I will be giving you the contents of the request in form of a list and you need to process it whether that particular content can be considered vexatious or not.
-The list of content of the request is as follows:[ {text} ]
-and the document containing the vexatiuous rules and regulations is in [] , [{pdf_text}].
-You need to give it in a dictionary format with the request content as the key and response whether the request is vexatious or not as the value, and if it is vexatious then give the reason explaining why.
+YYou are a Freedom of Information request responder, I will be giving you a Freedom of Information request and you need to process it whether that particular content can be considered vexatious or not.
+The request is as follows enclosed in square brackets:[ {text} ]
+and the document containing the vexatiuous rules and regulations is in "" , "{pdf_text}".
+You need to give it in a dictionary format with the boolean value( whether the request is vexatious or not. You will return True if the request is not vexatious and False if the request is vexatious) as the key and the value of the dictionary will be the reason why you think the request can be considered vexatious or not.
 When you are giving the reason for putting a request vexatious remember that the meaning of vexatious request is:
 [Vexatious requests refer to repeated and persistent demands or inquiries that are intended to annoy, harass, or cause frustration to the recipient.
 These requests often go beyond the bounds of normal and reasonable communication, becoming a form of harassment or disruption. 
@@ -323,7 +323,7 @@ In various contexts, such as legal proceedings, administrative processes, or cus
 Dealing with vexatious requests may involve establishing clear boundaries, implementing procedures to address repetitive behavior, or, in extreme cases, taking legal measures to prevent ongoing harassment.]
 I want it in a dictionary format like given below for each component of the list:
     {{
-        "Component of the list provided": "If it is not vexatious then write "Not a Vexatious request" otherwise mention that it is Vexatious and why it will be considered as a vexatious request."
+        True/False(True in case request is not vexatious and False in case it is vexatious): "Reason for being a vexatious request or not being a vexatious request."
         }}
 DO NOT GIVE ANYTHING BUT THE DICTONARY.
 '''
@@ -704,9 +704,7 @@ async def index():
             full_name=await check_full_name(input_text)
             logging.debug("Full name: %s", full_name)
             print("fuction")
-            session["foi_request"]=input_text
-            session["email_id"]=email_id
-            session["timestamp"]=timestamp
+            
             print(full_name)
             print(type(full_name))
             return jsonify({'full_name': full_name})
@@ -728,9 +726,31 @@ async def full_name():
      if 'user' in session:
         if request.method == "POST":
             input_text = request.form.get("input_text")
-            full_name=await check_full_name(input_text)
-            logging.debug("Full name: %s", full_name)
-            return jsonify({'full_name': full_name})
+            
+            email_id = request.form.get("email_id")
+            timestamp = request.form.get("timestamp")
+            session["foi_request"]=input_text
+            session["email_id"]=email_id
+            session["timestamp"]=timestamp
+            full_name_task = check_full_name(input_text)
+            vexatious_task = check_for_vexatious(input_text)
+
+            full_name_result, vexatious_result = await asyncio.gather(full_name_task, vexatious_task)
+            vexatious_dict = parse_terminal_dict(vexatious_result)
+            vexatious_dict = ast.literal_eval(vexatious_dict)
+            print("vextious dict")
+            print(vexatious_dict)
+            print(type(vexatious_dict))
+            vexatious, vex_evidence = next(iter(vexatious_dict.items()))
+            print(vex_evidence)
+            full_name_result = ast.literal_eval( full_name_result)
+            print(full_name_result)
+            print(type(full_name_result))
+            if vexatious==False:
+                refusal=await refusal_notice("It is a vexatious request", input_text)
+                return render_template('triage.html', foi_request=input_text, full_name=full_name_result, vexatious=vexatious, vex_evidence=vex_evidence, refusal=refusal)
+            else:
+                return render_template('triage.html', foi_request=input_text, full_name=full_name_result, vexatious=vexatious, vex_evidence=vex_evidence)
         else:
             return render_template('index.html')
      else:
@@ -1048,7 +1068,9 @@ async def response():
 def refusal():
     if request.method == "POST":
         try:
-            refusal_text = request.form.get("refusal")
+            refusal_text = request.form.get("refusal_text")
+            print("refusal endpoimt")
+            print(refusal_text)
             return render_template("refusal.html", refusal_text=refusal_text)
         except Exception as e:
             logging.error("An error occurred in /refusal POST endpoint: %s", e)

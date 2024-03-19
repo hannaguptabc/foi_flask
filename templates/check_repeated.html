@@ -221,8 +221,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="text-align: start;">Component</th>
-                            <th>Vexatious Flag</th>
+                            <th style="text-align: start;">Request Component</th>
                             <th>Validation Result</th>
                             <th>Repeated Result</th>
                             <th>Is this information already present online?</th> <!-- New column -->
@@ -232,14 +231,6 @@
                         {% for component, result in repeated_dict.items() %}
                             <tr>
                                 <td>{{ component }}</td>
-                                <!-- Check for vexatious flag and display appropriate symbol -->
-                                <td style="text-align: center;">
-                                    {% if vexatious_flags[component] == 0 %}
-                                    &#10008; <!-- Cross mark -->
-                                    {% else %}
-                                    &#10004; <!-- Tick mark -->
-                                    {% endif %}
-                                </td>
                                 <!-- Display validation result -->
                                 <td style="text-align: center;">
                                     {% if valid_flag[component] == 0 %}

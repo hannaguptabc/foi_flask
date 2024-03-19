@@ -241,14 +241,14 @@
             <input type="hidden" name="result_list" value="{{ result }}" />
             <button type="submit">Previous</button>
           </form>
-          <form id="nextForm" action="/vexatious" method="post">
+          <form id="nextForm" action="/validate" method="post">
             <input type="hidden" name="result_list" value="{{ result }}" />
             <button type="submit">Next</button>
           </form>
         </div>
         <div class="loading-overlay" id="loadingOverlay">
           <div class="spinner"></div>
-          <div class="loading-text">Checking for vexatiousness</div>
+          <div class="loading-text">Checking for validation...</div>
       </div>
       </div>
     </div>
