@@ -7,6 +7,7 @@ import psycopg2
 # from passlib.context import CryptContext
 import datetime
 from openai import AzureOpenAI
+from openai import AsyncAzureOpenAI
 import os
 import uuid
 import logging
@@ -41,6 +42,7 @@ application.config['SESSION_USE_SIGNER'] = True
 client=AzureOpenAI(api_key = os.getenv("openai_api_key"),
                    api_version="2023-09-01-preview",
                    azure_endpoint=os.getenv("openai_api_base"))
+
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 logging.basicConfig(level=logging.DEBUG)
@@ -284,6 +286,8 @@ async def identify_part(text: str):
     return response.choices[0].message.content
 
 async def validation_of_request(contents: list):
+    await asyncio.sleep(1)
+    print("inside valid func")
 
     with open('triaging/1.1/validation.txt', 'r') as file:
     # Read the entire content of the file
@@ -292,19 +296,23 @@ async def validation_of_request(contents: list):
 
     content=f''' DO NOT RETURN ANYTHING OTHER THAN WHAT IS ASKED.
     You need to act like a Freedom of Information request responder. This is a list of contents asked in FOI request enclosed in [] [{contents}], you do not need to change this list or components in this just keep it static, and produce the following result.
-    The specific rules and regulations for considering what a valid FOI request are as Follows: "{valid}"
+    The specific rules and regulations for considering what a valid FOI request are as follows: "{valid}"
     You need to go through each component of the list and check whether it is a valid FOI request under the given documentation above or does it come under any exemptions, you need to mention that to.
-    I want it in a dictionary format like given below for each component of the list:
+   I want the json object to be structured like this:
     {{
-        "Component of the list provided": "If it valid then write "Valid request" otherwise mention that it is not valid and why it won't be considered a valid request."
+        "Component of the list provided": {{
+        True/False (True in case the request is a valid request and not a subject access request(SAR) or Environmental Information (EIR) requests, give False if it is not a valid request based on the above criteria or it is a EIR or SAR):"Reason for the result(Here you basically need to justify why you think it is a valid request or invalid or SAR or EIR)"
+        }},
+
         }}
 Remember to only verify if the information asked in request is valid or not, the vexatious request would be checked later so leave them.
-JUST RETURN THE DICTIONARY ITSELF NO EXTRA WORDS OR QOUTATIONS.
+JUST RETURN THE JSON OBJECT ITSELF NO EXTRA WORDS OR QOUTATIONS.
 '''
     response =client.chat.completions.create(
         model="gpt-4-1106",
         messages=[{"role": "system", "content": content}]
     )
+    print("ending valid funct")
     return response.choices[0].message.content
 
 
@@ -443,9 +451,35 @@ Now you need to frame the letter in such a way that you mention all the parts an
     )
     return response.choices[0].message.content
 
+async def check_for_opinioted(request_list):
+    await asyncio.sleep(3)
+    print("in the op function")
+    content = f'''
+You have to act as an FOI request responder and check if the given question from a particular request is asking for a Request handler's opinion, in that case you need to return a json object as follows:
+{{
+        "Component of the list provided": {{
+        True/False (True if it is not asking for an opinion False if it is asking for an opinion) : "Reason for you answer(here you need to give an explanation why you think this request is asking for an opinion or not.)"
+        }},
+
+        }}
+The list of request is enclosed in the [] ahead: [{request_list}]
+
+
+DO NOT RETURN ANYTHING BUT THE JSON OBJECT ITSELF.
+'''
+    response= client.chat.completions.create(
+        model="gpt-4-1106",
+        messages=[{"role":"system", "content":content}]
+    )
+    print(response.choices[0].message.content)
+
+    return response.choices[0].message.content
+
+
 
 
 async def generate_response_letter(request, responses_json):
+
     response_template='''Dear [Requester's Name], 
 
 Thank you for your request for information under the Freedom of Information Act 2000.  
@@ -663,7 +697,51 @@ async def process_requests(request_list):
     complete_dict = dict(zip(request_list, results))
     return complete_dict
 
+async def combine_json(validation_json, opinionated_json):
+    combined_result = {}
+
+    for key in validation_json.keys():
+        combined_result[key] = {
+            "validation": bool(validation_json[key].keys()),
+            "validation_evidence":  next(iter(validation_json[key].values()))
+        , 
+            "opinionated": bool(opinionated_json[key].keys()),
+            "opinionated_evidence": next(iter(opinionated_json[key].values()))
+        }
+    return combined_result
+
+
+async def combine_function(request_list):
+    validation_task = validation_of_request(request_list)
+    opinionated_task = check_for_opinioted(request_list)
+                # Await both tasks concurrently
+    tasks=[validation_task, opinionated_task]
+    validation_result, opinionated_result = await asyncio.gather(*tasks)
+    opinionated_json = extract_json_from_braces(opinionated_result)
+    opinionated_json = ast.literal_eval(opinionated_json)
+    validation_json = extract_json_from_braces(validation_result)
+    validation_json = ast.literal_eval(validation_json)
+
+    print("printing the json")
+    print(validation_json)
+    print("printing the opinionated json")
+    print(opinionated_json)
+    combined_result = await combine_json(validation_json, opinionated_json)
+    print("combined result")
+    print(combined_result)
+    return combined_result
+
+
+
+
+
+
+
 ################################ End Points Start here ################################ 
+
+
+
+
 @application.route("/", methods=["GET"])
 def login():
     return render_template('login.html')
@@ -734,8 +812,8 @@ async def full_name():
             session["timestamp"]=timestamp
             full_name_task = check_full_name(input_text)
             vexatious_task = check_for_vexatious(input_text)
-
-            full_name_result, vexatious_result = await asyncio.gather(full_name_task, vexatious_task)
+            tasks=[full_name_task, vexatious_task]
+            full_name_result, vexatious_result = await asyncio.gather(*tasks)
             vexatious_dict = parse_terminal_dict(vexatious_result)
             vexatious_dict = ast.literal_eval(vexatious_dict)
             print("vextious dict")
@@ -751,25 +829,6 @@ async def full_name():
                 return render_template('triage.html', foi_request=input_text, full_name=full_name_result, vexatious=vexatious, vex_evidence=vex_evidence, refusal=refusal)
             else:
                 return render_template('triage.html', foi_request=input_text, full_name=full_name_result, vexatious=vexatious, vex_evidence=vex_evidence)
-        else:
-            return render_template('index.html')
-     else:
-        logging.debug("User is not logged in")
-        return '''
-        <script>
-            alert('Sorry but you need to login to work with FOI');
-            window.location = '/login';  
-        </script>
-        '''
-
-@application.route("/vex", methods=["GET","POST"])
-async def vex():
-     if 'user' in session:
-        if request.method == "POST":
-            input_text = request.form.get("input_text")
-            vexatious= await check_for_vexatious(input_text)
-            logging.debug("Vexatious: %s", vexatious)
-            return jsonify({'vex': vexatious})
         else:
             return render_template('index.html')
      else:
@@ -804,93 +863,56 @@ async def identify_parts():
         </script>
         '''
         
-@application.route("/vexatious", methods=["GET","POST"])
-async def vexatious():
-    if 'user' in session:
-        if request.method =="POST":
-            try:
-                request_list=session.get("request_list")
-                logging.debug("Request list: %s", request_list)
-
-                gpt_vexatious_dict = await check_for_vexatious(request_list)
-                vexatious_dict = parse_terminal_dict(gpt_vexatious_dict)
-                vexatious_dict = ast.literal_eval(vexatious_dict)
-                logging.debug("Vexatious dict: %s", vexatious_dict)
-
-                vexatious_flag = {key: 1 if value.startswith("Not") else 0 for key, value in vexatious_dict.items()}
-                session["vexatious_flag"] = vexatious_flag
-                vex = any(value == 0 for value in vexatious_flag.values())
-                refusal = None
-                if vex:
-                    foi_request = session.get("foi_request")
-                    reason = "it is a vexatious request"
-                    refusal = await refusal_notice(reason, foi_request)
-                return render_template("vexatious.html", vexatious_dict=vexatious_dict, refusal=refusal)
-            except Exception as e:
-                logging.error("An error occurred in /vexatious endpoint: %s", e)
-                return "An error occurred, please try again later."
-        else:
-            return render_template("vexatious.html", vexatious_dict=vexatious_dict)
-    else:
-        return '''
-        <script>
-            alert('Sorry but you need to login to work with FOI');
-            window.location = '/login';  
-        </script>
-        '''
         
 
 @application.route("/validate", methods=["GET","POST"])
 async def validation():
     if 'user' in session:
-        if request.method =="POST":
-            try:
-                request_list=session.get("request_list")
-                validation_result = await validation_of_request(request_list)
-                validation_result = parse_terminal_dict(validation_result)
-                validation_dict = ast.literal_eval(validation_result)
-                session["valid_dict"] = validation_dict
-                return render_template("validation.html", validation_dict=validation_dict, vexatious_flag=session.get("vexatious_flag"))
-            except Exception as e:
-                logging.error("An error occurred in /validate endpoint: %s", e)
-                return "An error occurred, please try again later."
-        else:
-            return render_template("validation.html", validation_dict=validation_dict)
+            if request.method == "POST":
+                request_list = session.get("request_list")
+                combined_result=await combine_function(request_list)
+                session["validation_json"] = combined_result
+                return render_template("validation.html", validation_json=combined_result)
+            else:
+                validation_json = session.get("validation_json", {})
+                return render_template("validation.html", validation_json=validation_json)
     else:
         return '''
-        <script>
-            alert('Sorry but you need to login to work with FOI');
-            window.location = '/login';  
-        </script>
-        '''
+            <script>
+                alert('Sorry but you need to login to work with FOI');
+                window.location = '/login';  
+            </script>
+            '''
 
 
 @application.route("/check_repeated", methods=["GET","POST"])
 async def check_repeated():
     if 'user' in session:
-        if request.method =="POST":
-            try:
-                email = session.get("email_id")
-                latest_timestamp = session.get("timestamp")
-                valid_dict = session.get("valid_dict")
-                valid_flag = {key: 1 if value.startswith("Valid") else 0 for key, value in valid_dict.items()}
-                session["valid_flag"] = valid_flag
+        if request.method == "POST":
+            email = session.get("email_id")
+            latest_timestamp = session.get("timestamp")
+            validation_json = session.get("validation_json")
+            valid_flag = {}
 
-                previous_requests = get_requests_by_email(email, latest_timestamp)
-                gpt_repeated_dict = await check_for_repeated(previous_requests, session.get("request_list"))
-                repeated_dict = parse_terminal_dict(gpt_repeated_dict)
-                repeated_dict = ast.literal_eval(repeated_dict)
-                session.pop("timestamp", None)
-                session.pop("email_id", None)
-                repeated_flag = {key: 0 if value.startswith("Repeated") else 1 for key, value in repeated_dict.items()}
-                session["repeated_dict"] = repeated_dict
+            for component, status_dict in validation_json.items():
+                if 'True' in status_dict and status_dict['True']:
+                    valid_flag[component] = 1
+                else:
+                    valid_flag[component] = 0
+            session["valid_flag"] = valid_flag
 
-                return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag, vexatious_flags=session.get("vexatious_flag"))
-            except Exception as e:
-                logging.error("An error occurred in /check_repeated endpoint: %s", e)
-                return "An error occurred, please try again later."
+            previous_requests = get_requests_by_email(email, latest_timestamp)
+            gpt_repeated_dict = await check_for_repeated(previous_requests, session.get("request_list"))
+            repeated_dict = parse_terminal_dict(gpt_repeated_dict)
+            repeated_dict = ast.literal_eval(repeated_dict)
+            session.pop("timestamp", None)
+            session.pop("email_id", None)
+            repeated_flag = {key: 0 if value.startswith("Repeated") else 1 for key, value in repeated_dict.items()}
+            session["repeated_dict"] = repeated_dict
+
+            return render_template("check_repeated.html", repeated_dict=repeated_dict, valid_flag=valid_flag)
         else:
-            return render_template("check_repeated.html", repeated_dict=session.get("repeated_dict"), valid_flag=session.get("valid_flag"), vexatious_flags=session.get("vexatious_flag"))
+            return render_template("check_repeated.html", repeated_dict=session.get("repeated_dict"), valid_flag=session.get("valid_flag"))
     else:
         return '''
         <script>
@@ -898,7 +920,7 @@ async def check_repeated():
             window.location = '/login';  
         </script>
         '''
-    
+
 
 
 @application.route("/completeness_check", methods=["GET","POST"])

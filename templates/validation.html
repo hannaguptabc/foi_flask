@@ -206,6 +206,45 @@
             margin-top: 20px; /* Added */
             font-size: 16px; /* Added */
         }
+        .status-block {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px; /* Adjust spacing between blocks */
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-block.green {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .status-block.red {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .evidence {
+            display: none;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .evidence p {
+            margin-bottom: 10px;
+        }
+
+        .evidence .checkbox {
+            margin-right: 10px;
+        }
+
+        .evidence .checkbox label {
+            margin-right: 5px;
+        }
+
     </style>
 </head>
 <body>
@@ -220,24 +259,46 @@
     <div class="wrapper">
         <div class="container">
             <h2>Validation Result</h2>
-            {% if validation_dict %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Component</th>
-                    <th>Can it be recognised as a valid FOI request?</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for component, result in validation_dict.items() %}
+            {% if validation_json %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>FOI Request</th>
+                        <th>Validation and Opinionated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Loop through each FOI request -->
+                    {% for component, validation_dict in validation_json.items() %}
                     <tr>
                         <td>{{ component }}</td>
-                        <td style="text-align: center;">{{ result }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <td>
 
+                            <!-- Display validation block -->
+                            <div class="status-block {% if validation_dict.validation %}green{% else %}red{% endif %}" onclick="toggleEvidence('{{ component }}_validation')">Valid FOI Request</div>
+                            <div id="evidence_{{ component }}_validation" class="evidence" style="display: none;">
+                                {% if validation_dict.validation %}
+                                <p><strong>Evidence for Validity:</strong> {{ validation_dict.validation_evidence }}</p>
+                                {% else %}
+                                <p><strong>Evidence for Invalidity:</strong> {{ validation_dict.validation_evidence }}</p>
+                                {% endif %}
+                            </div>
+                            <!-- Display opinionated block -->
+                            <div class="status-block {% if validation_dict.opinionated %}green{% else %}red{% endif %}" onclick="toggleEvidence('{{ component }}_opinionated')">Opinionated?</div>
+                            <div id="evidence_{{ component }}_opinionated" class="evidence" style="display: none;">
+                                {% if validation_dict.opinionated %}
+                                <p><strong>Evidence for Opinionated:</strong> {{ validation_dict.opinionated_evidence }}</p>
+                                {% else %}
+                                <p><strong>Evidence for Non-Opinionated:</strong> {{ validation_dict.opinionated_evidence }}</p>
+                                {% endif %}
+                            </div>
+                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
                 <div class="btn-wrapper">
                     <form action="/identify_parts" method="get">
                         <button type="submit">Previous</button>
@@ -275,6 +336,14 @@
           const loadingOverlay = document.getElementById('loadingOverlay');
           loadingOverlay.style.display = 'flex';
       }
+      function toggleEvidence(component) {
+        var evidence = document.getElementById('evidence_' + component);
+        if (evidence.style.display === 'none') {
+            evidence.style.display = 'block';
+        } else {
+            evidence.style.display = 'none';
+        }
+    }
 
     </script>
 </body>
